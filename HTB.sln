@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HTB", "HTB\HTB.csproj", "{BBA52D7F-72AA-4B08-9853-DCA6DBFE66D4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HTBTests", "HTBTests\HTBTests.csproj", "{5A951D19-F07F-46AA-AE79-5B6932FD0A15}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BBA52D7F-72AA-4B08-9853-DCA6DBFE66D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BBA52D7F-72AA-4B08-9853-DCA6DBFE66D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BBA52D7F-72AA-4B08-9853-DCA6DBFE66D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BBA52D7F-72AA-4B08-9853-DCA6DBFE66D4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5A951D19-F07F-46AA-AE79-5B6932FD0A15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A951D19-F07F-46AA-AE79-5B6932FD0A15}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A951D19-F07F-46AA-AE79-5B6932FD0A15}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A951D19-F07F-46AA-AE79-5B6932FD0A15}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
