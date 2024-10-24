@@ -4,6 +4,7 @@ namespace HTBTests
 {
     using NUnit.Framework;
     using System;
+    using System.IO;
 
     public class AdminTests
     {
@@ -22,19 +23,42 @@ namespace HTBTests
         [Test]
         public void TestAdminCreateCourse()
         {
-            Assert.DoesNotThrow(() => admin.CreateCourse(course));
+            using (var sw = new StringWriter())
+            {
+                Console.SetOut(sw); 
+                Assert.DoesNotThrow(() => admin.CreateCourse(course));
+
+                
+                var result = sw.ToString().Trim();
+                Assert.That(result, Is.EqualTo($"Admin {admin.Name} created course: {course.CourseName}"));
+            }
         }
 
         [Test]
         public void TestAdminModifyUser()
         {
-            Assert.DoesNotThrow(() => admin.ModifyUser(user));
+            using (var sw = new StringWriter())
+            {
+                Console.SetOut(sw); 
+                Assert.DoesNotThrow(() => admin.ModifyUser(user));
+
+             
+                var result = sw.ToString().Trim();
+                Assert.That(result, Is.EqualTo($"Admin {admin.Name} modified user {user.Name}"));
+            }
         }
 
         [Test]
         public void TestAdminViewReports()
         {
-            Assert.DoesNotThrow(() => admin.ViewReports());
+            using (var sw = new StringWriter())
+            {
+                Console.SetOut(sw);
+                Assert.DoesNotThrow(() => admin.ViewReports());
+
+                var result = sw.ToString().Trim();
+                Assert.That(result, Is.EqualTo($"Admin {admin.Name} viewed reports."));
+            }
         }
     }
 }

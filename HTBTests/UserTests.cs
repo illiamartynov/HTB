@@ -4,6 +4,7 @@ namespace HTBTests
 {
     using NUnit.Framework;
     using System;
+    using System.IO;
 
     public class UserTests
     {
@@ -20,15 +21,29 @@ namespace HTBTests
         [Test]
         public void TestAddCourse()
         {
-            Assert.DoesNotThrow(() => user.AddCourse(course));
-            Assert.That(user.EnrolledCourses.Count, Is.EqualTo(1));
+            using (var sw = new StringWriter())
+            {
+                Console.SetOut(sw);
+                Assert.DoesNotThrow(() => user.AddCourse(course));
+
+                var result = sw.ToString().Trim();
+                Assert.That(result, Does.Contain($"Added course: {course.CourseName} for user: {user.Username}"));
+            }
         }
 
         [Test]
         public void TestViewCourses()
         {
-            user.AddCourse(course);
-            Assert.DoesNotThrow(() => user.ViewCourses());
+            using (var sw = new StringWriter())
+            {
+                Console.SetOut(sw); 
+
+                user.AddCourse(course);  
+                Assert.DoesNotThrow(() => user.ViewCourses());
+
+                var result = sw.ToString().Trim();
+                Assert.That(result, Does.Contain(course.CourseName)); 
+            }
         }
     }
-}
+}   

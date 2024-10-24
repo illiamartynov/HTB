@@ -4,6 +4,7 @@ namespace HTBTests
 {
     using NUnit.Framework;
     using System;
+    using System.IO;
 
     public class CertificateTests
     {
@@ -18,13 +19,27 @@ namespace HTBTests
         [Test]
         public void TestGenerateCertificate()
         {
-            Assert.DoesNotThrow(() => certificate.GenerateCertificate());
+            using (var sw = new StringWriter())
+            {
+                Console.SetOut(sw); 
+                Assert.DoesNotThrow(() => certificate.GenerateCertificate());
+
+                var result = sw.ToString().Trim();
+                Assert.That(result, Is.EqualTo($"Certificate {certificate.CertificateId} generated."));
+            }
         }
 
         [Test]
         public void TestViewCertificate()
         {
-            Assert.DoesNotThrow(() => certificate.ViewCertificate());
+            using (var sw = new StringWriter())
+            {
+                Console.SetOut(sw);
+                Assert.DoesNotThrow(() => certificate.ViewCertificate());
+
+                var result = sw.ToString().Trim();
+                Assert.That(result, Is.EqualTo($"Certificate ID: {certificate.CertificateId}, Issue Date: {certificate.IssueDate}"));
+            }
         }
     }
 }
