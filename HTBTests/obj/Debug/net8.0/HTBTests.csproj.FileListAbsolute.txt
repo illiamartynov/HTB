@@ -103,3 +103,4 @@ C:\Users\Илья\RiderProjects\HTB\HTBTests\obj\Debug\net8.0\refint\HTBTests.dl
 C:\Users\Илья\RiderProjects\HTB\HTBTests\obj\Debug\net8.0\HTBTests.pdb
 C:\Users\Илья\RiderProjects\HTB\HTBTests\obj\Debug\net8.0\HTBTests.genruntimeconfig.cache
 C:\Users\Илья\RiderProjects\HTB\HTBTests\obj\Debug\net8.0\ref\HTBTests.dll
+C:\Users\Илья\RiderProjects\HTB\HTBTests\obj\Debug\net8.0\HTBTests.sourcelink.json

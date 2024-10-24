@@ -1,40 +1,40 @@
-﻿namespace HTB;
-
-using System;
-using System.Collections.Generic;
-
-public class Leaderboard
+﻿namespace HTB
 {
-    public int Rank { get; set; }
-    public int TotalPoints { get; set; }
-    public List<Person> RankedPeople { get; set; } = new List<Person>();
+    using System;
+    using System.Collections.Generic;
 
-    public Leaderboard(int rank, int totalPoints)
+    public class Leaderboard
     {
-        Rank = rank;
-        TotalPoints = totalPoints;
-    }
+        public List<(Person Person, int Rank, int TotalPoints)> RankedPeople { get; set; } = new List<(Person, int, int)>();
 
-    public void AddPersonToLeaderboard(Person person)
-    {
-        RankedPeople.Add(person);
-    }
-
-    public void ViewRankings()
-    {
-        foreach (var person in RankedPeople)
+        public void AddPersonToLeaderboard(Person person, int rank, int totalPoints)
         {
-            Console.WriteLine($"Person: {person.Name}, Rank: {Rank}, Total Points: {TotalPoints}");
+            RankedPeople.Add((person, rank, totalPoints));
         }
-    }
 
-    public void UpdateRankings(Person person, int newRank, int newTotalPoints)
-    {
-        Rank = newRank;
-        TotalPoints = newTotalPoints;
-        if (!RankedPeople.Contains(person))
+        public void ViewRankings()
         {
-            RankedPeople.Add(person);
+            foreach (var entry in RankedPeople)
+            {
+                Console.WriteLine($"Person: {entry.Person.Name}, Rank: {entry.Rank}, Total Points: {entry.TotalPoints}");
+            }
+        }
+
+        public void UpdateRankings(Person person, int newRank, int newTotalPoints)
+        {
+            var existingEntry = RankedPeople.Find(entry => entry.Person == person);
+
+            if (existingEntry.Person != null)
+            {
+                // Обновляем существующую запись
+                RankedPeople.Remove(existingEntry);
+                RankedPeople.Add((person, newRank, newTotalPoints));
+            }
+            else
+            {
+                // Добавляем нового человека
+                AddPersonToLeaderboard(person, newRank, newTotalPoints);
+            }
         }
     }
 }

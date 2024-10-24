@@ -12,3 +12,4 @@ C:\Users\Илья\RiderProjects\HTB\HTB\obj\Debug\net8.0\refint\HTB.dll
 C:\Users\Илья\RiderProjects\HTB\HTB\obj\Debug\net8.0\HTB.pdb
 C:\Users\Илья\RiderProjects\HTB\HTB\obj\Debug\net8.0\HTB.genruntimeconfig.cache
 C:\Users\Илья\RiderProjects\HTB\HTB\obj\Debug\net8.0\ref\HTB.dll
+C:\Users\Илья\RiderProjects\HTB\HTB\obj\Debug\net8.0\HTB.sourcelink.json

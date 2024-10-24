@@ -1,0 +1,1 @@
+[{"ChallengeName":"Buffer Overflow","Difficulty":"Hard","Description":"Exploit a buffer overflow","Points":100,"Status":0,"Attempts":[]},{"ChallengeName":"SQL Injection","Difficulty":"Medium","Description":"Exploit a SQL injection","Points":50,"Status":2,"Attempts":[]}]
