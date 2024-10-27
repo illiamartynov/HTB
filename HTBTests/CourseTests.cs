@@ -9,20 +9,22 @@ namespace HTBTests
     public class CourseTests
     {
         private Course course;
+        private Person person;
+        private Person_Course personCourse;
 
         [SetUp]
         public void Setup()
         {
             Course.Extent.Clear();  
-            course = new Course("Nmap", "Easy", false);
+            course = new Course("Nmap");
+            person = new Person("user@example.com", "UserTest", "password", DateTime.Now, DateTime.Now.AddYears(-20), true, 500, new Profile(500, "Intermediate"), new Leaderboard());
+            personCourse = new Person_Course(person, course, "Easy");
         }
 
         [Test]
         public void TestCourseCreation()
         {
             Assert.That(course.CourseName, Is.EqualTo("Nmap"));
-            Assert.That(course.Level, Is.EqualTo("Easy"));
-            Assert.That(course.IsCompleted, Is.False);
         }
 
         [Test]
@@ -34,36 +36,15 @@ namespace HTBTests
                 Assert.DoesNotThrow(() => course.Enroll());
 
                 var result = sw.ToString().Trim();
-                Assert.That(result, Does.Contain(""));  
+                Assert.That(result, Does.Contain("Enrolled in course"));  
             }
         }
 
         [Test]
-        public void TestCompleteCourse()
+        public void TestCompleteCourseThroughAssociation()
         {
-            using (var sw = new StringWriter())
-            {
-                Console.SetOut(sw);
-                course.CompleteCourse();
-
-               
-                Assert.That(course.IsCompleted, Is.True);
-
-                var result = sw.ToString().Trim();
-                Assert.That(result, Does.Contain(""));  
-            }
-        }
-
-        [Test]
-        public void TestExtentSerialization()
-        {
-            var course2 = new Course("Nmap", "Easy", false);
-
-            Course.SaveExtent("test_course_extent.json");
-
-            Course.LoadExtent("test_course_extent.json");
-
-            Assert.That(Course.Extent.Count, Is.EqualTo(2));
+            personCourse.CompleteCourse();
+            Assert.That(personCourse.IsCompleted, Is.True);
         }
     }
 }

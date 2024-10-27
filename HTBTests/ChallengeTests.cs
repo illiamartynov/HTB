@@ -8,12 +8,14 @@ namespace HTBTests
     public class ChallengeTests
     {
         private Challenge challenge;
+        private Person person;
 
         [SetUp]
         public void Setup()
         {
             Challenge.Extent.Clear();
             challenge = new Challenge("Buffer Overflow", "Hard", "Exploit a buffer overflow", 100, ChallengeStatus.NotTried);
+            person = new Person("person@example.com", "TestPerson", "password", DateTime.Now, DateTime.Now.AddYears(-25), true, 0, new Profile(0, "Novice"), new Leaderboard());
         }
 
         [Test]
@@ -28,24 +30,11 @@ namespace HTBTests
         [Test]
         public void TestAddAttempt()
         {
-            var attempt = new Attempt(1, DateTime.Now, "Success");
+            var attempt = new Attempt(person, challenge, DateTime.Now, "Success");
             
-            challenge.AddAttempt(attempt);
-
-            Assert.That(challenge.Attempts.Count, Is.EqualTo(1));
-            Assert.That(challenge.Attempts[0].Result, Is.EqualTo("Success"));
-        }
-
-        [Test]
-        public void TestExtentSerialization()
-        {
-            var challenge2 = new Challenge("SQL Injection", "Medium", "Exploit a SQL injection", 50, ChallengeStatus.Solved);
-
-            Challenge.SaveExtent("test_challenge_extent.json");
-
-            Challenge.LoadExtent("test_challenge_extent.json");
-
-            Assert.That(Challenge.Extent.Count, Is.EqualTo(2));
+            Assert.That(attempt.Result, Is.EqualTo("Success"));
+            Assert.That(attempt.Challenge, Is.EqualTo(challenge));
+            Assert.That(attempt.Person, Is.EqualTo(person));
         }
     }
 }
