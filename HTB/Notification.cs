@@ -9,12 +9,13 @@ public class Notification
     public string Message { get; set; }
     public bool IsRead { get; set; }
 
-    
+    public List<Person> Persons { get; set; }
     public Notification(int notificationId, string message, bool isRead)
     {
         NotificationId = notificationId;
         Message = message;
         IsRead = isRead;
+        Persons = new List<Person>();
     }
 
     
