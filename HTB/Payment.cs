@@ -8,26 +8,24 @@ public class Payment
     public float Amount { get; set; }
     public DateTime PaymentDate { get; set; }
     public string PaymentMethod { get; set; }
-    public static string Currency { get; set; } = "USD"; 
+    public string Currency { get; set; } 
 
-    
-    public Payment(int paymentID, float amount, DateTime paymentDate, string paymentMethod)
+    public Payment(int paymentID, float amount, DateTime paymentDate, string paymentMethod, string currency = "grvn")
     {
         PaymentID = paymentID;
         Amount = amount;
         PaymentDate = paymentDate;
         PaymentMethod = paymentMethod;
+        Currency = currency;
     }
 
-    
     public void ProcessPayment()
     {
         Console.WriteLine($"Processed payment of {Amount} {Currency}.");
     }
 
-    
     public void ViewPaymentDetails()
     {
-        Console.WriteLine($"PaymentID: {PaymentID}, Amount: {Amount}, Method: {PaymentMethod}, Date: {PaymentDate}");
+        Console.WriteLine($"PaymentID: {PaymentID}, Amount: {Amount} {Currency}, Method: {PaymentMethod}, Date: {PaymentDate}");
     }
 }
