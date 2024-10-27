@@ -22,7 +22,7 @@ public class Person
     public List<Payment> Payments { get; set; } = new List<Payment>();
     public List<Notification> Notifications { get; set; } = new List<Notification>();
     public Leaderboard Leaderboard { get; set; }
-
+    public List<Person> ReferredUsers { get; private set; } = new List<Person>();
     public Person() { }
 
     public Person(string email, string name, string password, DateTime registrationDate, DateTime birthDate, bool isActive, int balance, Profile profile, Leaderboard leaderboard)
@@ -94,5 +94,14 @@ public class Person
         var age = today.Year - birthDate.Year;
         if (birthDate.Date > today.AddYears(-age)) age--;
         return age;
+    }
+    
+    public void AddReferredUser(Person referredUser)
+    {
+        if (referredUser != null && !ReferredUsers.Contains(referredUser))
+        {
+            ReferredUsers.Add(referredUser);
+            Console.WriteLine($"{Name} invited a new user: {referredUser.Name}");
+        }
     }
 }
