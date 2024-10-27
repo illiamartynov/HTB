@@ -16,7 +16,7 @@ namespace HTBTests
         public void Setup()
         {
             admin = new Admin("admin@example.com", "AdminUser", "password", DateTime.Now, DateTime.Now.AddYears(-30), true, 1000, 1, new Profile(1000, "Beginner"), new Leaderboard());
-            user = new User("user@example.com", "UserTest", "password", DateTime.Now, DateTime.Now.AddYears(-20), true, 500, "user123", new Profile(500, "Intermediate"), new Leaderboard());
+            user = new User("user@example.com", "UserTest", "password", DateTime.Now, DateTime.Now.AddYears(-20), true, 500, "user123", new Profile(500, "intermediate"), new Leaderboard());
             course = new Course("Pentesting 101");
         }
 

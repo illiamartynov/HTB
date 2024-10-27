@@ -8,7 +8,7 @@ class Program
     {
         // Инициализация Leaderboard
         var leaderboard = new Leaderboard();
-        var profile1 = new Profile(200, "Intermediate");
+        var profile1 = new Profile(200, "intermediate");
         var profile2 = new Profile(100, "Beginner");
 
         // Инициализация Person

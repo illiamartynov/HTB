@@ -13,19 +13,19 @@ namespace HTBTests
         public void Setup()
         {
             Person.Extent.Clear(); 
-            person = new Person("person@example.com", "John Doe", "password", DateTime.Now, DateTime.Now.AddYears(-25), true, 100, new Profile(500, "Intermediate"), new Leaderboard());
+            person = new Person("person@example.com", "Volodymyr Zelensky", "password", DateTime.Now, DateTime.Now.AddYears(-25), true, 100, new Profile(500, "intermediate"), new Leaderboard());
         }
 
         [Test]
         public void TestPersonCreation()
         {
-            Assert.That(person.Name, Is.EqualTo("John Doe"));
+            Assert.That(person.Name, Is.EqualTo("Volodymyr Zelensky"));
         }
 
         [Test]
         public void TestExtentSerialization()
         {
-            var person2 = new Person("person2@example.com", "Jane Doe", "password", DateTime.Now, DateTime.Now.AddYears(-30), true, 150, new Profile(600, "Advanced"), new Leaderboard());
+            var person2 = new Person("person2@example.com", "Volodymyr Zelensky", "password", DateTime.Now, DateTime.Now.AddYears(-30), true, 150, new Profile(600, "advanced"), new Leaderboard());
 
             Person.SaveExtent("test_person_extent.json");
 

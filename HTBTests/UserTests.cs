@@ -15,7 +15,7 @@ namespace HTBTests
         [SetUp]
         public void Setup()
         {
-            user = new User("user@example.com", "UserTest", "password", DateTime.Now, DateTime.Now.AddYears(-20), true, 500, "user123", new Profile(500, "Intermediate"), new Leaderboard());
+            user = new User("user@example.com", "UserTest", "password", DateTime.Now, DateTime.Now.AddYears(-20), true, 500, "user123", new Profile(500, "intermediate"), new Leaderboard());
             course = new Course("Pentesting 101");
             personCourse = new Person_Course(user, course, "Medium");
         }
@@ -29,9 +29,10 @@ namespace HTBTests
                 Assert.DoesNotThrow(() => user.AddCourse(course));
 
                 var result = sw.ToString().Trim();
-                Assert.That(result, Does.Contain($"Added course: {course.CourseName} for user: {user.Username}"));
+                Assert.That(result, Does.Contain($"Added course: {course.CourseName} for user: {user.Username}")); 
             }
         }
+
 
 
         [Test]
