@@ -20,6 +20,5 @@ public class Person_Course
     public void CompleteCourse()
     {
         IsCompleted = true;
-        Console.WriteLine($"Course {Course.CourseName} completed by {Person.Name}.");
     }
 }
