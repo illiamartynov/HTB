@@ -22,7 +22,7 @@ namespace HTBTests
             Assert.That(payment.PaymentID, Is.EqualTo(1));
             Assert.That(payment.Amount, Is.EqualTo(50.0f));
             Assert.That(payment.PaymentMethod, Is.EqualTo("credit card"));
-            Assert.That(payment.Currency, Is.EqualTo("EUR"));
+            Assert.That(Payment.Currency, Is.EqualTo("USD")); 
         }
 
         [Test]
@@ -34,7 +34,7 @@ namespace HTBTests
                 Assert.DoesNotThrow(() => payment.ProcessPayment());
 
                 var result = sw.ToString().Trim();
-                Assert.That(result, Is.EqualTo($"Processed payment of {payment.Amount} {payment.Currency}.")); 
+                Assert.That(result, Is.EqualTo($"Processed payment of {payment.Amount} in EUR (converted to USD).")); 
             }
         }
 
