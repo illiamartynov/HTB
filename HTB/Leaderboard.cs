@@ -26,13 +26,13 @@
 
             if (existingEntry.Person != null)
             {
-                // Обновляем существующую запись
+
                 RankedPeople.Remove(existingEntry);
                 RankedPeople.Add((person, newRank, newTotalPoints));
             }
             else
             {
-                // Добавляем нового человека
+
                 AddPersonToLeaderboard(person, newRank, newTotalPoints);
             }
         }

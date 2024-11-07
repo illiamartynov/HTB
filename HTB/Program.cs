@@ -6,59 +6,65 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Инициализация Leaderboard
+
         var leaderboard = new Leaderboard();
-        var profile1 = new Profile(200, "intermediate");
+        var profile1 = new Profile(200, "Intermediate");
         var profile2 = new Profile(100, "Beginner");
 
-        // Инициализация Person
-        var person1 = new Person("test1@example.com", "Test User 1", "password1", DateTime.Now, new DateTime(1990, 1, 1), true, 100, profile1, leaderboard);
-        var person2 = new Person("test2@example.com", "Test User 2", "password2", DateTime.Now, new DateTime(1992, 2, 2), false, 50, profile2, leaderboard);
+        var address1 = new Address { Country = "USA", City = "New York", Street = "5th Avenue", Number = 10 };
+        var rank1 = new Rank(1);
+        var completenessLevel1 = new CompletenessLevel(80, DateTime.Now.AddMonths(-1));
 
-        // Добавление людей в Leaderboard
+        var address2 = new Address { Country = "Canada", City = "Toronto", Street = "Queen St", Number = 20 };
+        var rank2 = new Rank(2);
+        var completenessLevel2 = new CompletenessLevel(50, DateTime.Now.AddMonths(-2));
+
+        var subscription1 = new Subscription(1, DateTime.Now, DateTime.Now.AddMonths(1), SubscriptionType.Premium, new Paid(100)); // Платная подписка
+        var subscription2 = new Subscription(2, DateTime.Now, DateTime.Now.AddMonths(1), SubscriptionType.Free, new Free(30)); // Бесплатная подписка на 30 дней
+
+        var person1 = new Person(
+            "test1@example.com", "Test User 1", "password1", DateTime.Now, new DateTime(1990, 1, 1), 
+            true, 100, profile1, leaderboard, address1, rank1, completenessLevel1, subscription1);
+        
+        var person2 = new Person(
+            "test2@example.com", "Test User 2", "password2", DateTime.Now, new DateTime(1992, 2, 2), 
+            false, 50, profile2, leaderboard, address2, rank2, completenessLevel2, subscription2);
+
         leaderboard.AddPersonToLeaderboard(person1, 1, 500);
         leaderboard.AddPersonToLeaderboard(person2, 2, 300);
 
-        // Генерация сертификата и привязка к человеку
         var certificate = new Certificate(1, DateTime.Now);
         person1.AddCertificate(certificate);
 
-        // Добавление платежа к человеку
-        var payment = new Payment(1, 100.0f, DateTime.Now, "Credit Card");
+        var payment = new Payment(1, 100.0f, DateTime.Now, "Credit Card", "USD");
         person1.AddPayment(payment);
 
-        // Добавление уведомления к человеку
-        var notification = new Notification(1, "Welcome to the platform!", false);
-        person1.AddNotification(notification);
-
-        // Вывод информации до сериализации
         Console.WriteLine("Before serialization:");
         foreach (var person in Person.Extent)
         {
             Console.WriteLine($"Name: {person.Name}, Email: {person.Email}, Balance: {person.Balance}");
         }
 
-        // Сохранение данных Person в файл
         Person.SaveExtent("person_extent.json");
         Console.WriteLine("\nObjects have been serialized and saved to person_extent.json");
 
-        // Очистка списка Person
         Person.Extent.Clear();
 
         Console.WriteLine("\nAfter clearing the list:");
         Console.WriteLine($"Person count: {Person.Extent.Count}");
 
-        // Загрузка данных из файла
         Person.LoadExtent("person_extent.json");
 
-        // Вывод информации после десериализации
         Console.WriteLine("\nAfter deserialization:");
         foreach (var person in Person.Extent)
         {
             Console.WriteLine($"Name: {person.Name}, Email: {person.Email}, Balance: {person.Balance}");
         }
 
-        // Вывод рангов
+        Console.WriteLine("\nSubscription Details:");
+        subscription1.ShowSubscriptionInfo();
+        subscription2.ShowSubscriptionInfo();
+
         Console.WriteLine("\nLeaderboard Rankings:");
         leaderboard.ViewRankings();
     }

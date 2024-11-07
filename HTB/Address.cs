@@ -1,9 +1,4 @@
-﻿namespace HTB;
-
-using System;
-using System.Collections.Generic;
-
-public class Address
+﻿public class Address
 {
     public static List<Address> Addresses = new List<Address>(); 
 
@@ -11,6 +6,8 @@ public class Address
     public string City { get; set; }
     public string Street { get; set; }
     public int Number { get; set; }
+
+    public Address() { }
 
     public Address(string country, string city, string street, int number)
     {

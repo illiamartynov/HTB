@@ -17,19 +17,26 @@ public class Person
     public int Balance { get; set; }
     public int Age { get; private set; }
     public Profile UserProfile { get; set; }
+    public Address Address { get; set; } 
+    public Rank Rank { get; set; } 
+    public CompletenessLevel CompletenessLevel { get; set; } 
 
     public List<Certificate> Certificates { get; set; } = new List<Certificate>();
     public List<Payment> Payments { get; set; } = new List<Payment>();
-    public List<Notification> Notifications { get; set; } = new List<Notification>();
     public Leaderboard Leaderboard { get; set; }
     public List<Person> ReferredUsers { get; private set; } = new List<Person>();
+
+    public Subscription Subscription { get; set; }
+    public List<Course> Courses { get; set; } = new List<Course>();
+    public List<Challenge> Challenges { get; set; } = new List<Challenge>();
+
     public Person() { }
 
-    public Person(string email, string name, string password, DateTime registrationDate, DateTime birthDate, bool isActive, int balance, Profile profile, Leaderboard leaderboard)
+    public Person(
+        string email, string name, string password, DateTime registrationDate, DateTime birthDate, bool isActive, 
+        int balance, Profile profile, Leaderboard leaderboard, Address address, Rank rank, CompletenessLevel completenessLevel, 
+        Subscription subscription)
     {
-        if (string.IsNullOrEmpty(email)) throw new ArgumentException("Email is required");
-        if (string.IsNullOrEmpty(name)) throw new ArgumentException("Name is required");
-
         Email = email;
         Name = name;
         Password = password;
@@ -40,6 +47,10 @@ public class Person
         Age = CalculateAge(birthDate);
         UserProfile = profile;
         Leaderboard = leaderboard;
+        Address = address;
+        Rank = rank;
+        CompletenessLevel = completenessLevel;
+        Subscription = subscription;
         Extent.Add(this);
     }
 
@@ -68,9 +79,31 @@ public class Person
         Payments.Add(payment);
     }
 
-    public void AddNotification(Notification notification)
+    public void AddReferredUser(Person referredUser)
     {
-        Notifications.Add(notification);
+        if (referredUser != null && !ReferredUsers.Contains(referredUser))
+        {
+            ReferredUsers.Add(referredUser);
+            Console.WriteLine($"{Name} invited a new user: {referredUser.Name}");
+        }
+    }
+
+    public void AddCourse(Course course)
+    {
+        if (course != null && !Courses.Contains(course))
+        {
+            Courses.Add(course);
+            Console.WriteLine($"{Name} enrolled in course: {course.CourseName}");
+        }
+    }
+
+    public void AddChallenge(Challenge challenge)
+    {
+        if (challenge != null && !Challenges.Contains(challenge))
+        {
+            Challenges.Add(challenge);
+            Console.WriteLine($"{Name} accepted challenge: {challenge.ChallengeName}");
+        }
     }
 
     public static void SaveExtent(string filename = "person_extent.json")
@@ -95,13 +128,55 @@ public class Person
         if (birthDate.Date > today.AddYears(-age)) age--;
         return age;
     }
-    
-    public void AddReferredUser(Person referredUser)
+}
+
+
+
+public class CompletenessLevel
+{
+    public int CompletenessPercentage { get; set; }
+    public DateTime StartDate { get; set; }
+
+    public CompletenessLevel(int completenessPercentage, DateTime startDate)
     {
-        if (referredUser != null && !ReferredUsers.Contains(referredUser))
+        CompletenessPercentage = completenessPercentage;
+        StartDate = startDate;
+    }
+
+    public void UpdateCompleteness(int newPercentage)
+    {
+        if (newPercentage >= 0 && newPercentage <= 100)
         {
-            ReferredUsers.Add(referredUser);
-            Console.WriteLine($"{Name} invited a new user: {referredUser.Name}");
+            CompletenessPercentage = newPercentage;
+            Console.WriteLine($"Completeness updated to {newPercentage}%.");
+        }
+        else
+        {
+            Console.WriteLine("Invalid percentage value. Must be between 0 and 100.");
+        }
+    }
+}
+
+
+public class Rank
+{
+    public int RankLevel { get; set; }
+
+    public Rank(int rankLevel)
+    {
+        RankLevel = rankLevel;
+    }
+
+    public void UpdateRank(int newRankLevel)
+    {
+        if (newRankLevel > 0)
+        {
+            RankLevel = newRankLevel;
+            Console.WriteLine($"Rank updated to level {newRankLevel}.");
+        }
+        else
+        {
+            Console.WriteLine("Invalid rank level. Must be greater than 0.");
         }
     }
 }
