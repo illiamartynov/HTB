@@ -15,8 +15,8 @@ namespace HTBTests
         [SetUp]
         public void Setup()
         {
-            Course.Extent.Clear();  
-            course = new Course("Nmap");
+            Course.Extent.Clear();
+            course = new Course("Nmap", "Intermediate", new OSINT("Network Scanning"), new Free(30));
             person = new Person("user@example.com", "UserTest", "password", DateTime.Now, DateTime.Now.AddYears(-20), true, 500, new Profile(500, "intermediate"), new Leaderboard());
             personCourse = new Person_Course(person, course, "easy");
         }
@@ -32,11 +32,11 @@ namespace HTBTests
         {
             using (var sw = new StringWriter())
             {
-                Console.SetOut(sw);  
-                Assert.DoesNotThrow(() => course.Enroll());
+                Console.SetOut(sw);
+                Assert.DoesNotThrow(() => course.RegisterCourse());
 
                 var result = sw.ToString().Trim();
-                Assert.That(result, Does.Contain("Enrolled in course"));  
+                Assert.That(result, Does.Contain("Course Nmap registered"));
             }
         }
 

@@ -15,46 +15,75 @@ public enum ChallengeStatus
 
 public class Challenge
 {
-    public static List<Challenge> Extent = new List<Challenge>();  
+    private static List<Challenge> _extent = new List<Challenge>();
+    private string _challengeName;
+    private string _difficulty;
+    private string _description;
+    private int _points;
+    private ChallengeStatus _status;
+    private List<Attempt> _attempts = new List<Attempt>();
 
-    public string ChallengeName { get; set; }
-    public string Difficulty { get; set; }
-    public string Description { get; set; }
-    public int Points { get; set; }
-    public ChallengeStatus Status { get; set; }  
-    public List<Attempt> Attempts { get; set; } = new List<Attempt>();  
+    public static List<Challenge> Extent => _extent;
 
-    
-    public Challenge(string challengeName, string difficulty, string description, int points, ChallengeStatus status)
+    public string ChallengeName
     {
-        ChallengeName = challengeName;
-        Difficulty = difficulty;
-        Description = description;
-        Points = points;
-        Status = status;
-        Extent.Add(this);  
+        get => _challengeName;
+        set => _challengeName = value;
     }
 
-    
+    public string Difficulty
+    {
+        get => _difficulty;
+        set => _difficulty = value;
+    }
+
+    public string Description
+    {
+        get => _description;
+        set => _description = value;
+    }
+
+    public int Points
+    {
+        get => _points;
+        set => _points = value;
+    }
+
+    public ChallengeStatus Status
+    {
+        get => _status;
+        set => _status = value;
+    }
+
+    public List<Attempt> Attempts => _attempts;
+
+    public Challenge(string challengeName, string difficulty, string description, int points, ChallengeStatus status)
+    {
+        _challengeName = challengeName;
+        _difficulty = difficulty;
+        _description = description;
+        _points = points;
+        _status = status;
+        _extent.Add(this);
+    }
+
     public static void SaveExtent(string filename = "challenge_extent.json")
     {
-        var json = JsonSerializer.Serialize(Extent);
+        var json = JsonSerializer.Serialize(_extent);
         File.WriteAllText(filename, json);
     }
 
-    
     public static void LoadExtent(string filename = "challenge_extent.json")
     {
         if (File.Exists(filename))
         {
             var json = File.ReadAllText(filename);
-            Extent = JsonSerializer.Deserialize<List<Challenge>>(json);
+            _extent = JsonSerializer.Deserialize<List<Challenge>>(json) ?? new List<Challenge>();
         }
     }
 
-    
     public void AddAttempt(Attempt attempt)
     {
-        Attempts.Add(attempt);
+        _attempts.Add(attempt);
     }
 }

@@ -7,40 +7,47 @@ using System.Text.Json;
 
 public class Profile
 {
-    public static List<Profile> Extent = new List<Profile>(); 
+    public static List<Profile> Extent = new List<Profile>();
 
-    public int Points { get; set; }
-    public string AcademyLevel { get; set; }
+    private int _points;
+    private string _academyLevel;
 
-    
+    public int Points
+    {
+        get => _points;
+        set => _points = value;
+    }
+
+    public string AcademyLevel
+    {
+        get => _academyLevel;
+        set => _academyLevel = value;
+    }
+
     public Profile(int points, string academyLevel)
     {
-        Points = points;
-        AcademyLevel = academyLevel;
-        Extent.Add(this);  
+        _points = points;
+        _academyLevel = academyLevel;
+        Extent.Add(this);
     }
 
-    
     public void UpdateProfile(int points, string academyLevel)
     {
-        Points = points;
-        AcademyLevel = academyLevel;
+        _points = points;
+        _academyLevel = academyLevel;
     }
 
-    
     public void ViewProfile()
     {
-        Console.WriteLine($"Points: {Points}, Academy Level: {AcademyLevel}");
+        Console.WriteLine($"Points: {_points}, Academy Level: {_academyLevel}");
     }
 
-    
     public static void SaveExtent(string filename = "profile_extent.json")
     {
         var json = JsonSerializer.Serialize(Extent);
         File.WriteAllText(filename, json);
     }
 
-    
     public static void LoadExtent(string filename = "profile_extent.json")
     {
         if (File.Exists(filename))

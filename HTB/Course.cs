@@ -7,32 +7,57 @@ namespace HTB;
 
 public class Course
 {
-    public static List<Course> Extent = new List<Course>();
+    private static List<Course> _extent = new List<Course>();
+    private string _courseName;
+    private string _difficultyLevel;
+    private IContentType _contentType;
+    private IAccessType _accessType;
 
-    public string CourseName { get; set; }
-    public string DifficultyLevel { get; set; }
-    public IContentType ContentType { get; set; }
-    public IAccessType AccessType { get; set; }
+    public static List<Course> Extent => _extent;
+
+    public string CourseName
+    {
+        get => _courseName;
+        set => _courseName = value;
+    }
+
+    public string DifficultyLevel
+    {
+        get => _difficultyLevel;
+        set => _difficultyLevel = value;
+    }
+
+    public IContentType ContentType
+    {
+        get => _contentType;
+        set => _contentType = value;
+    }
+
+    public IAccessType AccessType
+    {
+        get => _accessType;
+        set => _accessType = value;
+    }
 
     public Course(string courseName, string difficultyLevel, IContentType contentType, IAccessType accessType)
     {
-        CourseName = courseName;
-        DifficultyLevel = difficultyLevel;
-        ContentType = contentType;
-        AccessType = accessType;
-        Extent.Add(this);
+        _courseName = courseName;
+        _difficultyLevel = difficultyLevel;
+        _contentType = contentType;
+        _accessType = accessType;
+        _extent.Add(this);
     }
 
     public void RegisterCourse()
     {
-        Console.WriteLine($"Course {CourseName} registered with difficulty level {DifficultyLevel}.");
-        Console.WriteLine($"Content Type: {ContentType.GetTypeDescription()}");
-        Console.WriteLine($"Access Type: {AccessType.GetAccessDescription()}");
+        Console.WriteLine($"Course {_courseName} registered with difficulty level {_difficultyLevel}.");
+        Console.WriteLine($"Content Type: {_contentType.GetTypeDescription()}");
+        Console.WriteLine($"Access Type: {_accessType.GetAccessDescription()}");
     }
 
     public static void SaveExtent(string filename = "course_extent.json")
     {
-        var json = JsonSerializer.Serialize(Extent);
+        var json = JsonSerializer.Serialize(_extent);
         File.WriteAllText(filename, json);
     }
 
@@ -41,7 +66,7 @@ public class Course
         if (File.Exists(filename))
         {
             var json = File.ReadAllText(filename);
-            Extent = JsonSerializer.Deserialize<List<Course>>(json);
+            _extent = JsonSerializer.Deserialize<List<Course>>(json) ?? new List<Course>();
         }
     }
 }
@@ -58,60 +83,84 @@ public interface IAccessType
 
 public class OSINT : IContentType
 {
-    public string TechniqueFocus { get; set; }
+    private string _techniqueFocus;
+
+    public string TechniqueFocus
+    {
+        get => _techniqueFocus;
+        set => _techniqueFocus = value;
+    }
 
     public OSINT(string techniqueFocus)
     {
-        TechniqueFocus = techniqueFocus;
+        _techniqueFocus = techniqueFocus;
     }
 
     public string GetTypeDescription()
     {
-        return $"OSINT with focus on {TechniqueFocus}";
+        return $"OSINT with focus on {_techniqueFocus}";
     }
 }
 
 public class PenetrationTesting : IContentType
 {
-    public string TestingEnvironment { get; set; }
+    private string _testingEnvironment;
+
+    public string TestingEnvironment
+    {
+        get => _testingEnvironment;
+        set => _testingEnvironment = value;
+    }
 
     public PenetrationTesting(string testingEnvironment)
     {
-        TestingEnvironment = testingEnvironment;
+        _testingEnvironment = testingEnvironment;
     }
 
     public string GetTypeDescription()
     {
-        return $"Penetration Testing in environment: {TestingEnvironment}";
+        return $"Penetration Testing in environment: {_testingEnvironment}";
     }
 }
 
 public class Free : IAccessType
 {
-    public int AccessDuration { get; set; }
+    private int _accessDuration;
+
+    public int AccessDuration
+    {
+        get => _accessDuration;
+        set => _accessDuration = value;
+    }
 
     public Free(int accessDuration)
     {
-        AccessDuration = accessDuration;
+        _accessDuration = accessDuration;
     }
 
     public string GetAccessDescription()
     {
-        return $"Free access for {AccessDuration} days";
+        return $"Free access for {_accessDuration} days";
     }
 }
 
 public class Paid : IAccessType
 {
-    public int Price { get; set; }
+    private int _price;
+
+    public int Price
+    {
+        get => _price;
+        set => _price = value;
+    }
 
     public Paid(int price)
     {
-        Price = price;
+        _price = price;
     }
 
     public string GetAccessDescription()
     {
-        return $"Paid access with price ${Price}";
+        return $"Paid access with price ${_price}";
     }
 }

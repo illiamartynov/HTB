@@ -2,28 +2,36 @@
 
 using System;
 
-
 public class Certificate
 {
-    public int CertificateId { get; set; }
-    public DateTime IssueDate { get; set; }
+    private int _certificateId;
+    private DateTime _issueDate;
 
-    
+    public int CertificateId
+    {
+        get => _certificateId;
+        private set => _certificateId = value;
+    }
+
+    public DateTime IssueDate
+    {
+        get => _issueDate;
+        private set => _issueDate = value;
+    }
+
     public Certificate(int certificateId, DateTime issueDate)
     {
-        CertificateId = certificateId;
-        IssueDate = issueDate;
+        _certificateId = certificateId;
+        _issueDate = issueDate;
     }
 
-    
     public void GenerateCertificate()
     {
-        Console.WriteLine($"Certificate {CertificateId} generated.");
+        Console.WriteLine($"Certificate {_certificateId} generated.");
     }
 
-    
     public void ViewCertificate()
     {
-        Console.WriteLine($"Certificate ID: {CertificateId}, Issue Date: {IssueDate}");
+        Console.WriteLine($"Certificate ID: {_certificateId}, Issue Date: {_issueDate}");
     }
 }

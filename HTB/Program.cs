@@ -6,16 +6,15 @@ class Program
 {
     static void Main(string[] args)
     {
-
         var leaderboard = new Leaderboard();
         var profile1 = new Profile(200, "Intermediate");
         var profile2 = new Profile(100, "Beginner");
 
-        var address1 = new Address { Country = "USA", City = "New York", Street = "5th Avenue", Number = 10 };
+        var address1 = new Address("USA", "New York", "5th Avenue", 10);
         var rank1 = new Rank(1);
         var completenessLevel1 = new CompletenessLevel(80, DateTime.Now.AddMonths(-1));
 
-        var address2 = new Address { Country = "Canada", City = "Toronto", Street = "Queen St", Number = 20 };
+        var address2 = new Address("Canada", "Toronto", "Queen St", 20);
         var rank2 = new Rank(2);
         var completenessLevel2 = new CompletenessLevel(50, DateTime.Now.AddMonths(-2));
 
@@ -48,7 +47,6 @@ class Program
         Person.SaveExtent("person_extent.json");
         Console.WriteLine("\nObjects have been serialized and saved to person_extent.json");
 
-        Person.Extent.Clear();
 
         Console.WriteLine("\nAfter clearing the list:");
         Console.WriteLine($"Person count: {Person.Extent.Count}");

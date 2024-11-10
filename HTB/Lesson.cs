@@ -7,45 +7,57 @@ using System.Collections.Generic;
 
 public class Lesson
 {
-    public static List<Lesson> Extent = new List<Lesson>(); 
+    private static List<Lesson> _extent = new List<Lesson>(); 
+    private string _lessonTitle;
+    private string _content;
 
-    public string LessonTitle { get; set; }
-    public string Content { get; set; }
+    public static List<Lesson> Extent
+    {
+        get => _extent;
+        private set => _extent = value;
+    }
 
-    
+    public string LessonTitle
+    {
+        get => _lessonTitle;
+        set => _lessonTitle = value;
+    }
+
+    public string Content
+    {
+        get => _content;
+        set => _content = value;
+    }
+
     public Lesson(string lessonTitle, string content)
     {
-        LessonTitle = lessonTitle;
-        Content = content;
-        Extent.Add(this); 
+        _lessonTitle = lessonTitle;
+        _content = content;
+        _extent.Add(this); 
     }
 
-    
     public void StartLesson()
     {
-        Console.WriteLine($"Lesson {LessonTitle} started.");
+        Console.WriteLine($"Lesson {_lessonTitle} started.");
     }
 
-    
     public void ViewResources()
     {
-        Console.WriteLine($"Viewing resources for lesson: {LessonTitle}");
+        Console.WriteLine($"Viewing resources for lesson: {_lessonTitle}");
     }
 
-    
     public static void SaveExtent(string filename = "lesson_extent.json")
     {
-        var json = JsonSerializer.Serialize(Extent);
+        var json = JsonSerializer.Serialize(_extent);
         File.WriteAllText(filename, json);
     }
 
-    
     public static void LoadExtent(string filename = "lesson_extent.json")
     {
         if (File.Exists(filename))
         {
             var json = File.ReadAllText(filename);
-            Extent = JsonSerializer.Deserialize<List<Lesson>>(json);
+            _extent = JsonSerializer.Deserialize<List<Lesson>>(json);
         }
     }
 }

@@ -13,30 +13,60 @@ namespace HTB
 
     public class Subscription
     {
-        public static List<Subscription> Extent = new List<Subscription>();  
+        public static List<Subscription> Extent = new List<Subscription>();
 
-        public int SubscriptionID { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public SubscriptionType Type { get; set; }  
-        public IAccessType AccessType { get; set; }  
+        private int _subscriptionID;
+        private DateTime _startDate;
+        private DateTime _endDate;
+        private SubscriptionType _type;
+        private IAccessType _accessType;
+
+        public int SubscriptionID
+        {
+            get => _subscriptionID;
+            set => _subscriptionID = value;
+        }
+
+        public DateTime StartDate
+        {
+            get => _startDate;
+            set => _startDate = value;
+        }
+
+        public DateTime EndDate
+        {
+            get => _endDate;
+            set => _endDate = value;
+        }
+
+        public SubscriptionType Type
+        {
+            get => _type;
+            set => _type = value;
+        }
+
+        public IAccessType AccessType
+        {
+            get => _accessType;
+            set => _accessType = value;
+        }
 
         public Subscription(int subscriptionID, DateTime startDate, DateTime endDate, SubscriptionType type, IAccessType accessType)
         {
-            SubscriptionID = subscriptionID;
-            StartDate = startDate;
-            EndDate = endDate;
-            Type = type;
-            AccessType = accessType;
-            Extent.Add(this);  
+            _subscriptionID = subscriptionID;
+            _startDate = startDate;
+            _endDate = endDate;
+            _type = type;
+            _accessType = accessType;
+            Extent.Add(this);
         }
 
         public void ShowSubscriptionInfo()
         {
-            Console.WriteLine($"Subscription ID: {SubscriptionID}");
-            Console.WriteLine($"Type: {Type}");
-            Console.WriteLine($"Access Details: {AccessType.GetAccessDescription()}");
-            Console.WriteLine($"Duration: {StartDate} - {EndDate}");
+            Console.WriteLine($"Subscription ID: {_subscriptionID}");
+            Console.WriteLine($"Type: {_type}");
+            Console.WriteLine($"Access Details: {_accessType.GetAccessDescription()}");
+            Console.WriteLine($"Duration: {_startDate} - {_endDate}");
         }
 
         public static void SaveExtent(string filename = "subscription_extent.json")

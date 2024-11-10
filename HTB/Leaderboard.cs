@@ -5,16 +5,22 @@
 
     public class Leaderboard
     {
-        public List<(Person Person, int Rank, int TotalPoints)> RankedPeople { get; set; } = new List<(Person, int, int)>();
+        private List<(Person Person, int Rank, int TotalPoints)> _rankedPeople = new List<(Person, int, int)>();
+
+        public List<(Person Person, int Rank, int TotalPoints)> RankedPeople
+        {
+            get => _rankedPeople;
+            private set => _rankedPeople = value;
+        }
 
         public void AddPersonToLeaderboard(Person person, int rank, int totalPoints)
         {
-            RankedPeople.Add((person, rank, totalPoints));
+            _rankedPeople.Add((person, rank, totalPoints));
         }
 
         public void ViewRankings()
         {
-            foreach (var entry in RankedPeople)
+            foreach (var entry in _rankedPeople)
             {
                 Console.WriteLine($"Person: {entry.Person.Name}, Rank: {entry.Rank}, Total Points: {entry.TotalPoints}");
             }
@@ -22,17 +28,15 @@
 
         public void UpdateRankings(Person person, int newRank, int newTotalPoints)
         {
-            var existingEntry = RankedPeople.Find(entry => entry.Person == person);
+            var existingEntry = _rankedPeople.Find(entry => entry.Person == person);
 
             if (existingEntry.Person != null)
             {
-
-                RankedPeople.Remove(existingEntry);
-                RankedPeople.Add((person, newRank, newTotalPoints));
+                _rankedPeople.Remove(existingEntry);
+                _rankedPeople.Add((person, newRank, newTotalPoints));
             }
             else
             {
-
                 AddPersonToLeaderboard(person, newRank, newTotalPoints);
             }
         }

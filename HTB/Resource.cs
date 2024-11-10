@@ -5,23 +5,41 @@ using System.Collections.Generic;
 
 public class Resource
 {
-    public static List<Resource> Resources = new List<Resource>();  
+    public static List<Resource> Resources = new List<Resource>();
 
-    public string ResourceName { get; set; }
-    public string ResourceType { get; set; }
-    public string Url { get; set; }
+    private string _resourceName;
+    private string _resourceType;
+    private string _url;
+
+    public string ResourceName
+    {
+        get => _resourceName;
+        set => _resourceName = value;
+    }
+
+    public string ResourceType
+    {
+        get => _resourceType;
+        set => _resourceType = value;
+    }
+
+    public string Url
+    {
+        get => _url;
+        set => _url = value;
+    }
 
     public Resource(string resourceName, string resourceType, string url)
     {
-        ResourceName = resourceName;
-        ResourceType = resourceType;
-        Url = url;
-        Resources.Add(this); 
+        _resourceName = resourceName;
+        _resourceType = resourceType;
+        _url = url;
+        Resources.Add(this);
     }
 
     public void ViewResource()
     {
-        Console.WriteLine($"Viewing resource: {ResourceName}");
+        Console.WriteLine($"Viewing resource: {_resourceName}");
     }
 
     public static void ViewAllResources()

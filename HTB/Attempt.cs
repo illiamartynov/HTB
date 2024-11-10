@@ -7,33 +7,59 @@ using System.Text.Json;
 
 public class Attempt
 {
-    public Person Person { get; set; }
-    public Challenge Challenge { get; set; }
-    public DateTime Timestamp { get; private set; }
-    public string Result { get; private set; }
+    private Person _person;
+    private Challenge _challenge;
+    private DateTime _timestamp;
+    private string _result;
 
-    public static List<Attempt> Extent { get; set; } = new List<Attempt>();
+    private static List<Attempt> _extent = new List<Attempt>();
+
+    public Person Person
+    {
+        get => _person;
+        set => _person = value;
+    }
+
+    public Challenge Challenge
+    {
+        get => _challenge;
+        set => _challenge = value;
+    }
+
+    public DateTime Timestamp
+    {
+        get => _timestamp;
+        private set => _timestamp = value;
+    }
+
+    public string Result
+    {
+        get => _result;
+        private set => _result = value;
+    }
+
+    public static IReadOnlyList<Attempt> Extent => _extent.AsReadOnly();
 
     public Attempt(Person person, Challenge challenge, DateTime timestamp, string result)
     {
-        Person = person;
-        Challenge = challenge;
-        Timestamp = timestamp;
-        Result = result;
+        _person = person;
+        _challenge = challenge;
+        _timestamp = timestamp;
+        _result = result;
 
-        Extent.Add(this);
+        _extent.Add(this);
     }
 
     public void RecordAttempt()
     {
-        Console.WriteLine($"attempt recorded at {Timestamp} with result: {Result} for person: {Person.Name} on challenge: {Challenge.ChallengeName}");
+        Console.WriteLine($"attempt recorded at {_timestamp} with result: {_result} for person: {_person.Name} on challenge: {_challenge.ChallengeName}");
     }
 
     public static void SaveExtent(string filename = "attempt_extent.json")
     {
         try
         {
-            var json = JsonSerializer.Serialize(Extent);
+            var json = JsonSerializer.Serialize(_extent);
             File.WriteAllText(filename, json);
         }
         catch (Exception ex)
@@ -51,10 +77,10 @@ public class Attempt
                 var json = File.ReadAllText(filename);
                 var loadedExtent = JsonSerializer.Deserialize<List<Attempt>>(json);
 
-                Extent.Clear();
+                _extent.Clear();
                 if (loadedExtent != null)
                 {
-                    Extent.AddRange(loadedExtent);
+                    _extent.AddRange(loadedExtent);
                 }
             }
             catch (Exception ex)
