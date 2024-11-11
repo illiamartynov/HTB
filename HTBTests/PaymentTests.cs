@@ -22,7 +22,7 @@ namespace HTBTests
             Assert.That(payment.PaymentID, Is.EqualTo(1));
             Assert.That(payment.Amount, Is.EqualTo(50.0f));
             Assert.That(payment.PaymentMethod, Is.EqualTo("credit card"));
-            Assert.That(Payment.Currency, Is.EqualTo("USD")); 
+            Assert.That(Payment.Currency, Is.EqualTo("EUR")); 
         }
 
         [Test]

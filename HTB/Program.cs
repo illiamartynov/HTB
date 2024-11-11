@@ -18,8 +18,8 @@ class Program
         var rank2 = new Rank(2);
         var completenessLevel2 = new CompletenessLevel(50, DateTime.Now.AddMonths(-2));
 
-        var subscription1 = new Subscription(1, DateTime.Now, DateTime.Now.AddMonths(1), SubscriptionType.Premium, new Paid(100)); // Платная подписка
-        var subscription2 = new Subscription(2, DateTime.Now, DateTime.Now.AddMonths(1), SubscriptionType.Free, new Free(30)); // Бесплатная подписка на 30 дней
+        var subscription1 = new Subscription(1, DateTime.Now, DateTime.Now.AddMonths(1), SubscriptionType.Premium, new Paid(100)); 
+        var subscription2 = new Subscription(2, DateTime.Now, DateTime.Now.AddMonths(1), SubscriptionType.Free, new Free(30)); 
 
         var person1 = new Person(
             "test1@example.com", "Test User 1", "password1", DateTime.Now, new DateTime(1990, 1, 1), 

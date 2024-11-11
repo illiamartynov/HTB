@@ -1,4 +1,6 @@
-﻿namespace HTB;
+﻿using System.Text.Json.Serialization;
+
+namespace HTB;
 
 using System;
 using System.Collections.Generic;
@@ -13,10 +15,12 @@ public class Person
     public string Email { get; set; }
     public string Name { get; set; }
     private string _password;
+    
+    [JsonIgnore] 
     public string Password
     {
-        get => "****"; // Не возвращаем пароль в открытом виде
-        set => _password = HashPassword(value); // Пример простой хэш-функции
+        get => "****";
+        set => _password = HashPassword(value);
     }
 
     public DateTime RegistrationDate { get; set; }
@@ -46,11 +50,12 @@ public class Person
     private List<Challenge> _challenges = new List<Challenge>();
     public IReadOnlyList<Challenge> Challenges => _challenges;
 
+    public Person() {}
+
     public Person(
         string email, string name, string password, DateTime registrationDate, DateTime birthDate, bool isActive,
         int balance, Profile profile, Leaderboard leaderboard, Address address, Rank rank, CompletenessLevel completenessLevel,
         Subscription subscription)
-
     {
         Email = email;
         Name = name;
@@ -66,7 +71,6 @@ public class Person
         Rank = rank;
         CompletenessLevel = completenessLevel;
         Subscription = subscription;
-
         _extent.Add(this);
     }
 
@@ -143,6 +147,11 @@ public class Person
         }
     }
 
+    public static void ClearExtent()
+    {
+        _extent.Clear();
+    }
+
     private int CalculateAge(DateTime birthDate)
     {
         var today = DateTime.Today;
@@ -153,7 +162,6 @@ public class Person
 
     private string HashPassword(string password)
     {
-        // Простая имитация хэширования
         return Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(password));
     }
 }

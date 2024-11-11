@@ -16,7 +16,7 @@ namespace HTBTests
             Challenge.Extent.Clear();
             challenge = new Challenge("Buffer Overflow", "Hard", "Exploit a buffer overflow", 100, ChallengeStatus.NotTried);
 
-            // Создаем объект Person с заполнением всех необходимых параметров
+            
             person = new Person(
                 email: "person@example.com",
                 name: "TestPerson",
@@ -27,10 +27,10 @@ namespace HTBTests
                 balance: 0,
                 profile: new Profile(0, "Novice"),
                 leaderboard: new Leaderboard(),
-                address: new Address("USA", "New York", "5th Avenue", 101), // Пример Address
-                rank: new Rank(1),                                          // Пример Rank
-                completenessLevel: new CompletenessLevel(50, DateTime.Now), // Пример CompletenessLevel
-                subscription: new Subscription(1, DateTime.Now, DateTime.Now.AddMonths(1), SubscriptionType.Free, new Free(30)) // Пример Subscription
+                address: new Address("USA", "New York", "5th Avenue", 101), 
+                rank: new Rank(1),                                          
+                completenessLevel: new CompletenessLevel(50, DateTime.Now),
+                subscription: new Subscription(1, DateTime.Now, DateTime.Now.AddMonths(1), SubscriptionType.Free, new Free(30)) 
             );
         }
 
