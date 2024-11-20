@@ -11,7 +11,6 @@ public class AccessTypeConverter : JsonConverter<IAccessType>
         {
             var jsonObject = jsonDoc.RootElement;
 
-            // Определяем тип AccessType по полю Type
             if (jsonObject.TryGetProperty("Type", out var typeProp))
             {
                 var type = typeProp.GetString();

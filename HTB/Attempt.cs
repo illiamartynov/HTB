@@ -89,4 +89,9 @@ public class Attempt
             }
         }
     }
+
+    public static void ClearExtent()
+    {
+        _extent.Clear();
+    }
 }
