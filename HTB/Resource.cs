@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 public class Resource
 {
@@ -11,18 +12,24 @@ public class Resource
     private string _resourceType;
     private string _url;
 
+    [Required(ErrorMessage = "Resource name is required.")]
+    [StringLength(100, ErrorMessage = "Resource name cannot exceed 100 characters.")]
     public string ResourceName
     {
         get => _resourceName;
         set => _resourceName = value;
     }
 
+    [Required(ErrorMessage = "Resource type is required.")]
+    [StringLength(50, ErrorMessage = "Resource type cannot exceed 50 characters.")]
     public string ResourceType
     {
         get => _resourceType;
         set => _resourceType = value;
     }
 
+    [Required(ErrorMessage = "URL is required.")]
+    [Url(ErrorMessage = "Invalid URL format.")]
     public string Url
     {
         get => _url;

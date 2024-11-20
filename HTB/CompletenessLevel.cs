@@ -1,8 +1,13 @@
-﻿public class CompletenessLevel
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+
+public class CompletenessLevel
 {
     private int _completenessPercentage;
     private DateTime _startDate;
 
+    [Required(ErrorMessage = "Completeness percentage is required.")]
+    [Range(0, 100, ErrorMessage = "Completeness percentage must be between 0 and 100.")]
     public int CompletenessPercentage
     {
         get => _completenessPercentage;
@@ -15,6 +20,8 @@
         }
     }
 
+    [Required(ErrorMessage = "Start date is required.")]
+    [DataType(DataType.Date, ErrorMessage = "Start date must be a valid date.")]
     public DateTime StartDate
     {
         get => _startDate;

@@ -1,7 +1,12 @@
-﻿public class Rank
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+
+public class Rank
 {
     private int _rankLevel;
 
+    [Required(ErrorMessage = "Rank level is required.")]
+    [Range(1, int.MaxValue, ErrorMessage = "Rank level must be greater than 0.")]
     public int RankLevel
     {
         get => _rankLevel;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Text.Json;
 
@@ -15,24 +16,30 @@ namespace HTB
 
         public static IReadOnlyList<Course> Extent => _extent.AsReadOnly();
 
+        [Required(ErrorMessage = "Course name is required.")]
+        [StringLength(100, ErrorMessage = "Course name cannot exceed 100 characters.")]
         public string CourseName
         {
             get => _courseName;
             set => _courseName = value;
         }
 
+        [Required(ErrorMessage = "Difficulty level is required.")]
+        [StringLength(50, ErrorMessage = "Difficulty level cannot exceed 50 characters.")]
         public string DifficultyLevel
         {
             get => _difficultyLevel;
             set => _difficultyLevel = value;
         }
 
+        [Required(ErrorMessage = "Content type is required.")]
         public IContentType ContentType
         {
             get => _contentType;
             set => _contentType = value;
         }
 
+        [Required(ErrorMessage = "Access type is required.")]
         public IAccessType AccessType
         {
             get => _accessType;
@@ -75,6 +82,8 @@ namespace HTB
             _extent.Clear();
         }
     }
+
+
 
     public interface IContentType
     {

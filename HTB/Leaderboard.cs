@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
 
     public class Leaderboard
     {
@@ -13,7 +14,10 @@
             private set => _rankedPeople = value;
         }
 
-        public void AddPersonToLeaderboard(Person person, int rank, int totalPoints)
+        public void AddPersonToLeaderboard(
+            [Required(ErrorMessage = "Person is required.")] Person person,
+            [Range(1, int.MaxValue, ErrorMessage = "Rank must be a positive integer.")] int rank,
+            [Range(0, int.MaxValue, ErrorMessage = "Total points cannot be negative.")] int totalPoints)
         {
             _rankedPeople.Add((person, rank, totalPoints));
         }
@@ -26,7 +30,10 @@
             }
         }
 
-        public void UpdateRankings(Person person, int newRank, int newTotalPoints)
+        public void UpdateRankings(
+            [Required(ErrorMessage = "Person is required.")] Person person,
+            [Range(1, int.MaxValue, ErrorMessage = "New rank must be a positive integer.")] int newRank,
+            [Range(0, int.MaxValue, ErrorMessage = "New total points cannot be negative.")] int newTotalPoints)
         {
             var existingEntry = _rankedPeople.Find(entry => entry.Person == person);
 

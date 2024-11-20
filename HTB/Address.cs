@@ -1,52 +1,44 @@
-﻿public class Address
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+
+public class Address
 {
     private static List<Address> _addresses = new List<Address>();
 
-    private string _country;
-    private string _city;
-    private string _street;
-    private int _number;
+    [Required(ErrorMessage = "Country is required.")]
+    [StringLength(100, ErrorMessage = "Country name cannot exceed 100 characters.")]
+    public string Country { get; set; }
+
+    [Required(ErrorMessage = "City is required.")]
+    [StringLength(100, ErrorMessage = "City name cannot exceed 100 characters.")]
+    public string City { get; set; }
+
+    [Required(ErrorMessage = "Street is required.")]
+    [StringLength(200, ErrorMessage = "Street name cannot exceed 200 characters.")]
+    public string Street { get; set; }
+
+    [Required(ErrorMessage = "Number is required.")]
+    [Range(1, int.MaxValue, ErrorMessage = "Number must be a positive integer.")]
+    public int Number { get; set; }
 
     public static IReadOnlyList<Address> Addresses => _addresses.AsReadOnly();
-
-    public string Country
-    {
-        get => _country;
-        set => _country = value;
-    }
-
-    public string City
-    {
-        get => _city;
-        set => _city = value;
-    }
-
-    public string Street
-    {
-        get => _street;
-        set => _street = value;
-    }
-
-    public int Number
-    {
-        get => _number;
-        set => _number = value;
-    }
 
     public Address() { }
 
     public Address(string country, string city, string street, int number)
     {
-        _country = country;
-        _city = city;
-        _street = street;
-        _number = number;
+        Country = country;
+        City = city;
+        Street = street;
+        Number = number;
+
         _addresses.Add(this);
     }
 
     public void ViewAddress()
     {
-        Console.WriteLine($"{_street} {_number}, {_city}, {_country}");
+        Console.WriteLine($"{Street} {Number}, {City}, {Country}");
     }
 
     public static void ViewAllAddresses()

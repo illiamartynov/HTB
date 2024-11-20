@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Text.Json;
 
@@ -14,24 +15,29 @@ public class Attempt
 
     private static List<Attempt> _extent = new List<Attempt>();
 
+    [Required(ErrorMessage = "Person is required.")]
     public Person Person
     {
         get => _person;
         set => _person = value;
     }
 
+    [Required(ErrorMessage = "Challenge is required.")]
     public Challenge Challenge
     {
         get => _challenge;
         set => _challenge = value;
     }
 
+    [Required(ErrorMessage = "Timestamp is required.")]
     public DateTime Timestamp
     {
         get => _timestamp;
         private set => _timestamp = value;
     }
 
+    [Required(ErrorMessage = "Result is required.")]
+    [StringLength(100, ErrorMessage = "Result cannot exceed 100 characters.")]
     public string Result
     {
         get => _result;

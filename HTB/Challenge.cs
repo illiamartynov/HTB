@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Text.Json;
 
@@ -25,30 +26,39 @@ public class Challenge
 
     public static List<Challenge> Extent => _extent;
 
+    [Required(ErrorMessage = "Challenge name is required.")]
+    [StringLength(100, ErrorMessage = "Challenge name cannot exceed 100 characters.")]
     public string ChallengeName
     {
         get => _challengeName;
         set => _challengeName = value;
     }
 
+    [Required(ErrorMessage = "Difficulty is required.")]
+    [StringLength(50, ErrorMessage = "Difficulty cannot exceed 50 characters.")]
     public string Difficulty
     {
         get => _difficulty;
         set => _difficulty = value;
     }
 
+    [Required(ErrorMessage = "Description is required.")]
+    [StringLength(500, ErrorMessage = "Description cannot exceed 500 characters.")]
     public string Description
     {
         get => _description;
         set => _description = value;
     }
 
+    [Required(ErrorMessage = "Points are required.")]
+    [Range(1, int.MaxValue, ErrorMessage = "Points must be greater than 0.")]
     public int Points
     {
         get => _points;
         set => _points = value;
     }
 
+    [Required(ErrorMessage = "Status is required.")]
     public ChallengeStatus Status
     {
         get => _status;

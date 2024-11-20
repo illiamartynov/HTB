@@ -4,10 +4,11 @@ namespace HTB;
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 public class Lesson
 {
-    private static List<Lesson> _extent = new List<Lesson>(); 
+    private static List<Lesson> _extent = new List<Lesson>();
     private string _lessonTitle;
     private string _content;
 
@@ -17,12 +18,16 @@ public class Lesson
         private set => _extent = value;
     }
 
+    [Required(ErrorMessage = "Lesson title is required.")]
+    [StringLength(100, ErrorMessage = "Lesson title cannot exceed 100 characters.")]
     public string LessonTitle
     {
         get => _lessonTitle;
         set => _lessonTitle = value;
     }
 
+    [Required(ErrorMessage = "Content is required.")]
+    [StringLength(1000, ErrorMessage = "Content cannot exceed 1000 characters.")]
     public string Content
     {
         get => _content;
@@ -33,7 +38,7 @@ public class Lesson
     {
         _lessonTitle = lessonTitle;
         _content = content;
-        _extent.Add(this); 
+        _extent.Add(this);
     }
 
     public void StartLesson()

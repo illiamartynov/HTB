@@ -4,6 +4,7 @@ namespace HTB;
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Text.Json;
 
@@ -12,43 +13,79 @@ public class Person
     private static List<Person> _extent = new List<Person>();
     public static IReadOnlyList<Person> Extent => _extent;
 
+    [Required(ErrorMessage = "Email is required.")]
+    [EmailAddress(ErrorMessage = "Invalid email format.")]
     public string Email { get; set; }
+
+    [Required(ErrorMessage = "Name is required.")]
+    [StringLength(100, ErrorMessage = "Name cannot exceed 100 characters.")]
     public string Name { get; set; }
-    private string _password;
 
     [JsonIgnore]
+    [Required(ErrorMessage = "Password is required.")]
+    [StringLength(100, MinimumLength = 8, ErrorMessage = "Password must be at least 8 characters long.")]
+    private string _password;
+
     public string Password
     {
         get => "****";
         set => _password = HashPassword(value);
     }
 
+    [Required(ErrorMessage = "Registration date is required.")]
+    [DataType(DataType.Date, ErrorMessage = "Registration date must be a valid date.")]
     public DateTime RegistrationDate { get; set; }
+
+    [Required(ErrorMessage = "Birth date is required.")]
+    [DataType(DataType.Date, ErrorMessage = "Birth date must be a valid date.")]
     public DateTime BirthDate { get; set; }
+
+    [Required(ErrorMessage = "IsActive status is required.")]
     public bool IsActive { get; set; }
+
+    [Range(0, int.MaxValue, ErrorMessage = "Balance cannot be negative.")]
     public int Balance { get; set; }
-    public int Age { get; private set; }
+
+    [Required(ErrorMessage = "User profile is required.")]
     public Profile UserProfile { get; set; }
+
+    [Required(ErrorMessage = "Age is required.")]
+    [Range(0, 150, ErrorMessage = "Age must be between 0 and 150.")]
+    public int Age { get; private set; }
+
     public Address? Address { get; set; } 
+
+    [Required(ErrorMessage = "Rank is required.")]
     public Rank Rank { get; set; }
+
+    [Required(ErrorMessage = "Completeness level is required.")]
     public CompletenessLevel CompletenessLevel { get; set; }
 
-    private List<Certificate> _certificates = new List<Certificate>();
     public IReadOnlyList<Certificate> Certificates => _certificates;
 
-    private List<Payment> _payments = new List<Payment>();
+    private List<Certificate> _certificates = new List<Certificate>();
+
     public IReadOnlyList<Payment> Payments => _payments;
 
+    private List<Payment> _payments = new List<Payment>();
+
+    [Required(ErrorMessage = "Leaderboard is required.")]
     public Leaderboard Leaderboard { get; set; }
-    private List<Person> _referredUsers = new List<Person>();
+
     public IReadOnlyList<Person> ReferredUsers => _referredUsers;
 
+    private List<Person> _referredUsers = new List<Person>();
+
+    [Required(ErrorMessage = "Subscription is required.")]
     public Subscription Subscription { get; set; }
-    private List<Course> _courses = new List<Course>();
+
     public IReadOnlyList<Course> Courses => _courses;
 
-    private List<Challenge> _challenges = new List<Challenge>();
+    private List<Course> _courses = new List<Course>();
+
     public IReadOnlyList<Challenge> Challenges => _challenges;
+
+    private List<Challenge> _challenges = new List<Challenge>();
 
     public Person() {}
 
@@ -67,7 +104,7 @@ public class Person
         Age = CalculateAge(birthDate);
         UserProfile = profile;
         Leaderboard = leaderboard;
-        Address = address; 
+        Address = address;
         Rank = rank;
         CompletenessLevel = completenessLevel;
         Subscription = subscription;

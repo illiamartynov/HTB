@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Text.Json;
 
@@ -12,12 +13,16 @@ public class Profile
     private int _points;
     private string _academyLevel;
 
+    [Required(ErrorMessage = "Points are required.")]
+    [Range(0, int.MaxValue, ErrorMessage = "Points cannot be negative.")]
     public int Points
     {
         get => _points;
         set => _points = value;
     }
 
+    [Required(ErrorMessage = "Academy Level is required.")]
+    [StringLength(50, ErrorMessage = "Academy Level cannot exceed 50 characters.")]
     public string AcademyLevel
     {
         get => _academyLevel;
