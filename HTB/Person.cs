@@ -15,8 +15,8 @@ public class Person
     public string Email { get; set; }
     public string Name { get; set; }
     private string _password;
-    
-    [JsonIgnore] 
+
+    [JsonIgnore]
     public string Password
     {
         get => "****";
@@ -29,7 +29,7 @@ public class Person
     public int Balance { get; set; }
     public int Age { get; private set; }
     public Profile UserProfile { get; set; }
-    public Address Address { get; set; }
+    public Address? Address { get; set; } 
     public Rank Rank { get; set; }
     public CompletenessLevel CompletenessLevel { get; set; }
 
@@ -54,7 +54,7 @@ public class Person
 
     public Person(
         string email, string name, string password, DateTime registrationDate, DateTime birthDate, bool isActive,
-        int balance, Profile profile, Leaderboard leaderboard, Address address, Rank rank, CompletenessLevel completenessLevel,
+        int balance, Profile profile, Leaderboard leaderboard, Address? address, Rank rank, CompletenessLevel completenessLevel,
         Subscription subscription)
     {
         Email = email;
@@ -67,7 +67,7 @@ public class Person
         Age = CalculateAge(birthDate);
         UserProfile = profile;
         Leaderboard = leaderboard;
-        Address = address;
+        Address = address; 
         Rank = rank;
         CompletenessLevel = completenessLevel;
         Subscription = subscription;
