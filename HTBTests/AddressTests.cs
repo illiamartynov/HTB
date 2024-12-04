@@ -17,7 +17,7 @@ namespace HTBTests
         [Test]
         public void TestAddressCreation()
         {
-            var address = new Address("USA", "New York", "5th Avenue", 101);
+            var address = Address.AddAddress("USA", "New York", "5th Avenue", 101);
 
             Assert.Multiple(() =>
             {
@@ -31,30 +31,87 @@ namespace HTBTests
         [Test]
         public void TestAddressAddedToList()
         {
-            new Address("USA", "New York", "5th Avenue", 101);
-            new Address("Canada", "Toronto", "Queen St", 22);
+            Address.AddAddress("USA", "New York", "5th Avenue", 101);
+            Address.AddAddress("Canada", "Toronto", "Queen St", 22);
 
             Assert.That(Address.Addresses.Count, Is.EqualTo(2));
         }
 
         [Test]
-        public void TestViewAllAddresses()
+        public void TestAssignPersonToAddress()
         {
-            new Address("USA", "New York", "5th Avenue", 101);
-            new Address("Canada", "Toronto", "Queen St", 22);
+            var address = Address.AddAddress("USA", "New York", "5th Avenue", 101); // Создаем объект Address
 
-            using (var sw = new StringWriter())
+            var profile = new Profile(0, "Novice");
+            var leaderboard = new Leaderboard();
+            var rank = new Rank(1);
+            var completenessLevel = new CompletenessLevel(50, DateTime.Now);
+            var subscription = new Subscription(1, DateTime.Now, DateTime.Now.AddMonths(1), SubscriptionType.Free, new Free(30));
+
+            var person = Person.AddPerson(
+                "person@example.com",
+                "TestPerson",
+                "password",
+                DateTime.Now,
+                DateTime.Now.AddYears(-25),
+                true,
+                100,
+                profile,
+                leaderboard,
+                address, // Передаем корректный объект Address
+                rank,
+                completenessLevel,
+                subscription
+            );
+
+            Assert.Multiple(() =>
             {
-                Console.SetOut(sw);
-                Address.ViewAllAddresses();
-                var result = sw.ToString().Trim();
-
-                Assert.Multiple(() =>
-                {
-                    Assert.That(result, Does.Contain("5th Avenue 101, New York, USA"));
-                    Assert.That(result, Does.Contain("Queen St 22, Toronto, Canada"));
-                });
-            }
+                Assert.That(person.Address, Is.EqualTo(address));
+                Assert.That(address.Persons.Contains(person), Is.True);
+            });
         }
+
+
+        [Test]
+        public void TestRemovePersonFromAddress()
+        {
+            // Создаем адрес
+            var address = Address.AddAddress("USA", "New York", "5th Avenue", 101);
+
+            // Создаем профиль и связанные объекты
+            var profile = new Profile(0, "Novice");
+            var leaderboard = new Leaderboard();
+            var rank = new Rank(1);
+            var completenessLevel = new CompletenessLevel(50, DateTime.Now);
+            var subscription = new Subscription(1, DateTime.Now, DateTime.Now.AddMonths(1), SubscriptionType.Free, new Free(30));
+
+            // Создаем пользователя и связываем его с адресом
+            var person = Person.AddPerson(
+                "person@example.com",
+                "TestPerson",
+                "password",
+                DateTime.Now,
+                DateTime.Now.AddYears(-25),
+                true,
+                100,
+                profile,
+                leaderboard,
+                address,
+                rank,
+                completenessLevel,
+                subscription
+            );
+
+            // Удаляем пользователя из адреса
+            address.RemovePerson(person);
+
+            // Проверяем, что связь удалена
+            Assert.Multiple(() =>
+            {
+                Assert.That(address.Persons.Contains(person), Is.False);
+                Assert.That(person.Address, Is.Null);
+            });
+        }
+
     }
 }

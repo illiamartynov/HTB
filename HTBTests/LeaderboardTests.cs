@@ -18,7 +18,22 @@ namespace HTBTests
         {
             leaderboard = new Leaderboard();
 
-            person1 = new Person(
+            var address1 = Address.AddAddress("USA", "New York", "5th Avenue", 101);
+            var address2 = Address.AddAddress("USA", "Los Angeles", "Sunset Blvd", 202);
+
+            var profile1 = new Profile(0, "Novice");
+            var profile2 = new Profile(0, "Intermediate");
+
+            var rank1 = new Rank(1);
+            var rank2 = new Rank(2);
+
+            var completenessLevel1 = new CompletenessLevel(50, DateTime.Now);
+            var completenessLevel2 = new CompletenessLevel(75, DateTime.Now);
+
+            var subscription1 = new Subscription(1, DateTime.Now, DateTime.Now.AddMonths(1), SubscriptionType.Free, new Free(30));
+            var subscription2 = new Subscription(2, DateTime.Now, DateTime.Now.AddMonths(1), SubscriptionType.Premium, new Paid(100));
+
+            person1 = Person.AddPerson(
                 email: "person1@example.com",
                 name: "Alice",
                 password: "password1",
@@ -26,15 +41,15 @@ namespace HTBTests
                 birthDate: DateTime.Now.AddYears(-25),
                 isActive: true,
                 balance: 100,
-                profile: new Profile(0, "Novice"),
-                leaderboard: new Leaderboard(),
-                address: new Address("USA", "New York", "5th Avenue", 101),
-                rank: new Rank(1),
-                completenessLevel: new CompletenessLevel(50, DateTime.Now),
-                subscription: new Subscription(1, DateTime.Now, DateTime.Now.AddMonths(1), SubscriptionType.Free, new Free(30))
+                profile: profile1,
+                leaderboard: leaderboard,
+                address: address1,
+                rank: rank1,
+                completenessLevel: completenessLevel1,
+                subscription: subscription1
             );
 
-            person2 = new Person(
+            person2 = Person.AddPerson(
                 email: "person2@example.com",
                 name: "Bob",
                 password: "password2",
@@ -42,12 +57,12 @@ namespace HTBTests
                 birthDate: DateTime.Now.AddYears(-30),
                 isActive: true,
                 balance: 200,
-                profile: new Profile(0, "Intermediate"),
-                leaderboard: new Leaderboard(),
-                address: new Address("USA", "Los Angeles", "Sunset Blvd", 202),
-                rank: new Rank(2),
-                completenessLevel: new CompletenessLevel(75, DateTime.Now),
-                subscription: new Subscription(1, DateTime.Now, DateTime.Now.AddMonths(1), SubscriptionType.Premium, new Free(30))
+                profile: profile2,
+                leaderboard: leaderboard,
+                address: address2,
+                rank: rank2,
+                completenessLevel: completenessLevel2,
+                subscription: subscription2
             );
         }
 
