@@ -24,19 +24,38 @@ public class Certificate
         private set => _issueDate = value;
     }
 
-    public Certificate(int certificateId, DateTime issueDate)
+    [Required]
+    public Person Owner { get; private set; }
+
+    // Приватный конструктор, чтобы ограничить прямое создание объектов
+    private Certificate(int certificateId, DateTime issueDate, Person owner)
     {
-        _certificateId = certificateId;
-        _issueDate = issueDate;
+        CertificateId = certificateId;
+        IssueDate = issueDate;
+        Owner = owner ?? throw new ArgumentNullException(nameof(owner), "Owner cannot be null.");
     }
 
-    public void GenerateCertificate()
+    // Фабричный метод для создания сертификата
+    public static Certificate Create(int certificateId, DateTime issueDate, Person owner)
     {
-        Console.WriteLine($"Certificate {_certificateId} generated.");
+        return new Certificate(certificateId, issueDate, owner);
+    }
+
+    // Удаление ссылки на владельца
+    public void UnassignOwner()
+    {
+        Owner = null;
     }
 
     public void ViewCertificate()
     {
-        Console.WriteLine($"Certificate ID: {_certificateId}, Issue Date: {_issueDate}");
+        Console.WriteLine($"Certificate ID: {CertificateId}, Issue Date: {IssueDate}, Owner: {Owner.Name}");
     }
+    // Certificate
+    public void AssignOwner(Person owner)
+    {
+        Owner = owner ?? throw new ArgumentNullException(nameof(owner));
+    }
+
+   
 }

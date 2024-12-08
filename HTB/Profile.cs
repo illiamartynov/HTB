@@ -29,22 +29,40 @@ public class Profile
         set => _academyLevel = value;
     }
 
-    public Profile(int points, string academyLevel)
+    public Person Person { get; private set; } // Связь с `Person`
+
+    public Profile(int points, string academyLevel, Person person)
     {
-        _points = points;
-        _academyLevel = academyLevel;
-        Extent.Add(this);
+        Points = points >= 0 ? points : throw new ArgumentOutOfRangeException(nameof(points));
+        AcademyLevel = academyLevel ?? throw new ArgumentNullException(nameof(academyLevel));
+        Person = person ?? throw new ArgumentNullException(nameof(person));
     }
 
     public void UpdateProfile(int points, string academyLevel)
     {
-        _points = points;
-        _academyLevel = academyLevel;
+        Points = points >= 0 ? points : throw new ArgumentOutOfRangeException(nameof(points));
+        AcademyLevel = academyLevel ?? throw new ArgumentNullException(nameof(academyLevel));
     }
 
     public void ViewProfile()
     {
         Console.WriteLine($"Points: {_points}, Academy Level: {_academyLevel}");
+    }
+
+    // Присвоение человека к профилю
+    public void AssignPerson(Person person)
+    {
+        if (Person != null && Person != person)
+            throw new InvalidOperationException("This profile is already assigned to another person.");
+
+        Person = person;
+    }
+
+
+    // Удаление связи с человеком
+    public void UnassignPerson()
+    {
+        Person = null;
     }
 
     public static void SaveExtent(string filename = "profile_extent.json")

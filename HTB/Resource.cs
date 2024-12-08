@@ -36,25 +36,36 @@ public class Resource
         set => _url = value;
     }
 
-    public Resource(string resourceName, string resourceType, string url)
+    public Lesson Lesson { get; private set; }
+
+    public Resource(string resourceName, string resourceType, string url, Lesson lesson)
     {
         _resourceName = resourceName;
         _resourceType = resourceType;
         _url = url;
+
+        AssignLesson(lesson);
         Resources.Add(this);
     }
 
-    public void ViewResource()
+    public void AssignLesson(Lesson lesson)
     {
-        Console.WriteLine($"Viewing resource: {_resourceName}");
+        Lesson = lesson;
+        lesson.AddResource(this);
     }
 
-    public static void ViewAllResources()
+    public void UnassignLesson()
     {
-        Console.WriteLine("All resources:");
-        foreach (var resource in Resources)
+        if (Lesson != null)
         {
-            resource.ViewResource();
+            Lesson.RemoveResource(this);
+            Lesson = null;
         }
+    }
+
+    public static void DeleteResource(Resource resource)
+    {
+        Resources.Remove(resource);
+        resource.UnassignLesson();
     }
 }

@@ -11,8 +11,10 @@ namespace HTB
         private static List<Course> _extent = new List<Course>();
         private string _courseName;
         private string _difficultyLevel;
-        private IContentType _contentType;
         private IAccessType _accessType;
+
+        // Двусторонняя связь с Lesson
+        private List<Lesson> _lessons = new List<Lesson>();
 
         public static IReadOnlyList<Course> Extent => _extent.AsReadOnly();
 
@@ -32,13 +34,6 @@ namespace HTB
             set => _difficultyLevel = value;
         }
 
-        [Required(ErrorMessage = "Content type is required.")]
-        public IContentType ContentType
-        {
-            get => _contentType;
-            set => _contentType = value;
-        }
-
         [Required(ErrorMessage = "Access type is required.")]
         public IAccessType AccessType
         {
@@ -46,20 +41,60 @@ namespace HTB
             set => _accessType = value;
         }
 
-        public Course(string courseName, string difficultyLevel, IContentType contentType, IAccessType accessType)
+        public IReadOnlyList<Lesson> Lessons => _lessons.AsReadOnly();
+
+        public Course(string courseName, string difficultyLevel, IAccessType accessType)
         {
             _courseName = courseName;
             _difficultyLevel = difficultyLevel;
-            _contentType = contentType;
             _accessType = accessType;
             _extent.Add(this);
         }
 
-        public void RegisterCourse()
+        // Добавление уроков с двусторонней связью
+        public void AddLesson(Lesson lesson)
         {
-            Console.WriteLine($"Course {_courseName} registered with difficulty level {_difficultyLevel}.");
-            Console.WriteLine($"Content Type: {_contentType.GetTypeDescription()}");
+            if (lesson == null) throw new ArgumentNullException(nameof(lesson));
+            if (!_lessons.Contains(lesson))
+            {
+                _lessons.Add(lesson);
+                lesson.AssignToCourse(this);
+            }
+        }
+
+        // Удаление уроков с двусторонней связью
+        public void RemoveLesson(Lesson lesson)
+        {
+            if (lesson == null) throw new ArgumentNullException(nameof(lesson));
+            if (_lessons.Remove(lesson))
+            {
+                lesson.UnassignFromCourse();
+            }
+        }
+
+        // Удаление всех уроков
+        public void ClearLessons()
+        {
+            foreach (var lesson in new List<Lesson>(_lessons))
+            {
+                RemoveLesson(lesson);
+            }
+        }
+
+        // Динамическая регистрация курса
+        public virtual void RegisterCourse()
+        {
+            Console.WriteLine($"Course '{CourseName}' registered with difficulty '{DifficultyLevel}'.");
             Console.WriteLine($"Access Type: {_accessType.GetAccessDescription()}");
+        }
+
+        // Удаление курса с обработкой двусторонних связей
+        public static void DeleteCourse(Course course)
+        {
+            if (course == null) throw new ArgumentNullException(nameof(course));
+
+            course.ClearLessons();
+            _extent.Remove(course);
         }
 
         public static void SaveExtent(string filename = "course_extent.json")
@@ -83,105 +118,77 @@ namespace HTB
         }
     }
 
-
-
-    public interface IContentType
+    // Наследование вместо интерфейса для ContentType
+    public class OSINT : Course
     {
-        string GetTypeDescription();
+        public string TechniqueFocus { get; set; }
+
+        public OSINT(string courseName, string difficultyLevel, IAccessType accessType, string techniqueFocus)
+            : base(courseName, difficultyLevel, accessType)
+        {
+            TechniqueFocus = techniqueFocus;
+        }
+
+        public override void RegisterCourse()
+        {
+            base.RegisterCourse();
+            Console.WriteLine($"OSINT Course with focus on: {TechniqueFocus}");
+        }
     }
 
+    public class PenetrationTesting : Course
+    {
+        public string TestingEnvironment { get; set; }
+
+        public PenetrationTesting(string courseName, string difficultyLevel, IAccessType accessType, string testingEnvironment)
+            : base(courseName, difficultyLevel, accessType)
+        {
+            TestingEnvironment = testingEnvironment;
+        }
+
+        public override void RegisterCourse()
+        {
+            base.RegisterCourse();
+            Console.WriteLine($"Penetration Testing Course in environment: {TestingEnvironment}");
+        }
+    }
+
+    // AccessType остается динамическим
     public interface IAccessType
     {
         string Type { get; }
         string GetAccessDescription();
     }
 
-    public class OSINT : IContentType
-    {
-        public string Type => "OSINT";
-        private string _techniqueFocus;
-
-        public string TechniqueFocus
-        {
-            get => _techniqueFocus;
-            set => _techniqueFocus = value;
-        }
-
-        public OSINT(string techniqueFocus)
-        {
-            _techniqueFocus = techniqueFocus;
-        }
-
-        public string GetTypeDescription()
-        {
-            return $"OSINT with focus on {_techniqueFocus}";
-        }
-    }
-
-    public class PenetrationTesting : IContentType
-    {
-        public string Type => "PenetrationTesting";
-        private string _testingEnvironment;
-
-        public string TestingEnvironment
-        {
-            get => _testingEnvironment;
-            set => _testingEnvironment = value;
-        }
-
-        public PenetrationTesting(string testingEnvironment)
-        {
-            _testingEnvironment = testingEnvironment;
-        }
-
-        public string GetTypeDescription()
-        {
-            return $"Penetration Testing in environment: {_testingEnvironment}";
-        }
-    }
-
     public class Free : IAccessType
     {
         public string Type => "Free";
-        private int _accessDuration;
-
-        public int AccessDuration
-        {
-            get => _accessDuration;
-            set => _accessDuration = value;
-        }
+        public int AccessDuration { get; set; }
 
         public Free(int accessDuration)
         {
-            _accessDuration = accessDuration;
+            AccessDuration = accessDuration;
         }
 
         public string GetAccessDescription()
         {
-            return $"Free access for {_accessDuration} days";
+            return $"Free access for {AccessDuration} days.";
         }
     }
 
     public class Paid : IAccessType
     {
         public string Type => "Paid";
-        private int _price;
-
-        public int Price
-        {
-            get => _price;
-            set => _price = value;
-        }
+        public int Price { get; set; }
 
         public Paid(int price)
         {
-            _price = price;
+            Price = price;
         }
 
         public string GetAccessDescription()
         {
-            return $"Paid access with price ${_price}";
+            return $"Paid access with price ${Price}.";
         }
     }
-
 }

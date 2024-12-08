@@ -1,12 +1,12 @@
-﻿namespace HTB;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Text.Json;
 
-public enum ChallengeStatus
+namespace HTB
+{
+    public enum ChallengeStatus
 {
     NotTried,
     Attempted,
@@ -23,6 +23,7 @@ public class Challenge
     private int _points;
     private ChallengeStatus _status;
     private List<Attempt> _attempts = new List<Attempt>();
+    private List<Person> _participants = new List<Person>(); // Ассоциация с Person
 
     public static List<Challenge> Extent => _extent;
 
@@ -65,7 +66,8 @@ public class Challenge
         set => _status = value;
     }
 
-    public List<Attempt> Attempts => _attempts;
+    public IReadOnlyList<Attempt> Attempts => _attempts.AsReadOnly();
+    public IReadOnlyList<Person> Participants => _participants.AsReadOnly();
 
     public Challenge(string challengeName, string difficulty, string description, int points, ChallengeStatus status)
     {
@@ -75,6 +77,40 @@ public class Challenge
         _points = points;
         _status = status;
         _extent.Add(this);
+    }
+
+    public void AddAttempt(Attempt attempt)
+    {
+        if (attempt == null) throw new ArgumentNullException(nameof(attempt));
+        if (!_attempts.Contains(attempt))
+        {
+            _attempts.Add(attempt);
+        }
+    }
+
+    public void RemoveAttempt(Attempt attempt)
+    {
+        if (attempt == null) throw new ArgumentNullException(nameof(attempt));
+        _attempts.Remove(attempt);
+    }
+
+    public void AddParticipant(Person person)
+    {
+        if (person == null) throw new ArgumentNullException(nameof(person));
+        if (!_participants.Contains(person))
+        {
+            _participants.Add(person);
+            person.AddChallenge(this);
+        }
+    }
+
+    public void RemoveParticipant(Person person)
+    {
+        if (person == null) throw new ArgumentNullException(nameof(person));
+        if (_participants.Remove(person))
+        {
+            person.RemoveChallenge(this);
+        }
     }
 
     public static void SaveExtent(string filename = "challenge_extent.json")
@@ -92,8 +128,19 @@ public class Challenge
         }
     }
 
-    public void AddAttempt(Attempt attempt)
+    public static void DeleteChallenge(Challenge challenge)
     {
-        _attempts.Add(attempt);
+        if (challenge == null) throw new ArgumentNullException(nameof(challenge));
+        foreach (var attempt in challenge._attempts)
+        {
+            Attempt.DeleteAttempt(attempt);
+        }
+        foreach (var participant in challenge._participants)
+        {
+            participant.RemoveChallenge(challenge);
+        }
+        _extent.Remove(challenge);
     }
+}
+
 }

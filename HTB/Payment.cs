@@ -11,62 +11,63 @@ public class Payment
     private string _paymentMethod;
     private static string _currency = "USD";
 
-    [Required(ErrorMessage = "Payment ID is required.")]
-    [Range(1, int.MaxValue, ErrorMessage = "Payment ID must be a positive integer.")]
-    public int PaymentID
-    {
-        get => _paymentID;
-        set => _paymentID = value;
-    }
+    public int PaymentID => _paymentID;
+    public float Amount => _amount;
+    public DateTime PaymentDate => _paymentDate;
+    public string PaymentMethod => _paymentMethod;
+    public static string Currency => _currency;
 
-    [Required(ErrorMessage = "Amount is required.")]
-    [Range(0.01, float.MaxValue, ErrorMessage = "Amount must be greater than zero.")]
-    public float Amount
-    {
-        get => _amount;
-        set => _amount = value;
-    }
+    public Person Owner { get; private set; }
 
-    [Required(ErrorMessage = "Payment date is required.")]
-    [DataType(DataType.Date, ErrorMessage = "Payment date must be a valid date.")]
-    public DateTime PaymentDate
-    {
-        get => _paymentDate;
-        set => _paymentDate = value;
-    }
-
-    [Required(ErrorMessage = "Payment method is required.")]
-    [StringLength(50, ErrorMessage = "Payment method cannot exceed 50 characters.")]
-    public string PaymentMethod
-    {
-        get => _paymentMethod;
-        set => _paymentMethod = value;
-    }
-
-    [Required(ErrorMessage = "Currency is required.")]
-    [RegularExpression(@"^[A-Z]{3}$", ErrorMessage = "Currency must be a valid 3-letter ISO code.")]
-    public static string Currency
-    {
-        get => _currency;
-        set => _currency = value;
-    }
-
-    public Payment(int paymentID, float amount, DateTime paymentDate, string paymentMethod, string currency = "USD")
+    private Payment(int paymentID, float amount, DateTime paymentDate, string paymentMethod, Person owner, string currency = "USD")
     {
         _paymentID = paymentID;
         _amount = amount;
         _paymentDate = paymentDate;
         _paymentMethod = paymentMethod;
+        Owner = owner ?? throw new ArgumentNullException(nameof(owner));
         _currency = currency;
     }
 
-    public void ProcessPayment()
+    // Фабричный метод для создания платежа
+    public static Payment Create(int paymentID, float amount, DateTime paymentDate, string paymentMethod, Person owner, string currency = "USD")
     {
-        Console.WriteLine($"Processed payment of {_amount} in {_currency} (converted to USD).");
+        return new Payment(paymentID, amount, paymentDate, paymentMethod, owner, currency);
+    }
+
+    // Обновление данных платежа
+    public void Update(float? newAmount = null, DateTime? newDate = null, string? newMethod = null, string? newCurrency = null)
+    {
+        if (newAmount.HasValue)
+            _amount = newAmount.Value;
+        if (newDate.HasValue)
+            _paymentDate = newDate.Value;
+        if (!string.IsNullOrEmpty(newMethod))
+            _paymentMethod = newMethod;
+        if (!string.IsNullOrEmpty(newCurrency))
+            _currency = newCurrency;
+    }
+
+    // Удаление связи с владельцем
+    public void UnassignOwner()
+    {
+        Owner = null;
+    }
+
+    // Удаление платежа
+    public static void Delete(Payment payment)
+    {
+        payment.UnassignOwner();
     }
 
     public void ViewPaymentDetails()
     {
-        Console.WriteLine($"PaymentID: {_paymentID}, Amount: {_amount} in {_currency}, Method: {_paymentMethod}, Date: {_paymentDate}");
+        Console.WriteLine($"PaymentID: {_paymentID}, Amount: {_amount} in {_currency}, Method: {_paymentMethod}, Date: {_paymentDate}, Owner: {Owner?.Name}");
     }
+    // Payment
+    public void AssignOwner(Person owner)
+    {
+        Owner = owner ?? throw new ArgumentNullException(nameof(owner));
+    }
+
 }

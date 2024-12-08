@@ -46,9 +46,6 @@ public class Person
     [Range(0, int.MaxValue, ErrorMessage = "Balance cannot be negative.")]
     public int Balance { get; private set; }
 
-    [Required(ErrorMessage = "User profile is required.")]
-    public Profile UserProfile { get; private set; }
-
     [Required(ErrorMessage = "Age is required.")]
     [Range(0, 150, ErrorMessage = "Age must be between 0 and 150.")]
     public int Age { get; private set; }
@@ -88,6 +85,26 @@ public class Person
 
     private List<Challenge> _challenges = new List<Challenge>();
 
+    // Рефлексивная ассоциация
+    private List<Person> _referrals = new List<Person>();
+    public IReadOnlyList<Person> Referrals => _referrals.AsReadOnly();
+
+    public Person ReferredBy { get; private set; }
+
+
+    private int _totalPoints; // Очки пользователя
+
+    public int TotalPoints => _totalPoints;
+    
+    [Required(ErrorMessage = "Profile is required.")]
+    public Profile Profile { get; private set; } // Ссылка на Profile
+    
+    private List<Attempt> _attempts = new List<Attempt>(); // Связь с Attempt
+
+    public IReadOnlyList<Attempt> Attempts => _attempts.AsReadOnly();
+
+    
+    
     // Добавлен пустой конструктор для десериализации
     public Person()
     {
@@ -102,12 +119,15 @@ public class Person
         DateTime birthDate,
         bool isActive,
         int balance,
-        Profile userProfile,
         Leaderboard leaderboard,
         Address address,
         Rank rank,
         CompletenessLevel completenessLevel,
-        Subscription subscription)
+        Subscription subscription,
+        Profile profile,
+        List<Certificate>? certificates = null,
+        List<Payment>? payments = null
+    )
     {
         Email = email;
         Name = name;
@@ -116,30 +136,320 @@ public class Person
         BirthDate = birthDate;
         IsActive = isActive;
         Balance = balance;
-        UserProfile = userProfile;
+
+        AssignProfile(profile);
         Leaderboard = leaderboard;
         AssignAddress(address);
         Rank = rank;
         CompletenessLevel = completenessLevel;
         Subscription = subscription;
 
+        // Добавление сертификатов
+        if (certificates != null)
+        {
+            foreach (var certificate in certificates)
+            {
+                AddCertificate(certificate);
+            }
+        }
+
+        // Добавление платежей
+        if (payments != null)
+        {
+            foreach (var payment in payments)
+            {
+                AddPayment(payment);
+            }
+        }
+
         _extent.Add(this);
     }
 
-    public static Person AddPerson(
-        string email, string name, string password, DateTime registrationDate, DateTime birthDate, bool isActive,
-        int balance, Profile profile, Leaderboard leaderboard, Address address, Rank rank, CompletenessLevel completenessLevel,
-        Subscription subscription)
+
+    // Метод для добавления попытки
+    public void AddAttempt(Attempt attempt)
     {
-        var person = new Person(email, name, password, registrationDate, birthDate, isActive, balance, profile, leaderboard, address, rank, completenessLevel, subscription);
+        if (attempt == null) throw new ArgumentNullException(nameof(attempt));
+        if (!_attempts.Contains(attempt))
+        {
+            _attempts.Add(attempt);
+        }
+    }
+
+    // Метод для удаления попытки
+    public void RemoveAttempt(Attempt attempt)
+    {
+        if (attempt == null) throw new ArgumentNullException(nameof(attempt));
+        _attempts.Remove(attempt);
+    }
+    
+
+    public void AddChallenge(Challenge challenge)
+    {
+        if (challenge == null) throw new ArgumentNullException(nameof(challenge));
+        if (!_challenges.Contains(challenge))
+        {
+            _challenges.Add(challenge);
+            challenge.AddParticipant(this); // Устанавливаем связь
+        }
+    }
+
+    public void RemoveChallenge(Challenge challenge)
+    {
+        if (challenge == null) throw new ArgumentNullException(nameof(challenge));
+        if (_challenges.Remove(challenge))
+        {
+            challenge.RemoveParticipant(this); // Удаляем связь
+        }
+    }
+    
+    public Payment AssignPayment(int paymentID, float amount, DateTime paymentDate, string paymentMethod, string currency = "USD")
+    {
+        var payment = Payment.Create(paymentID, amount, paymentDate, paymentMethod, this, currency);
+        _payments.Add(payment);
+        return payment;
+    }
+
+    public void UnassignPayment(Payment payment)
+    {
+        if (payment == null)
+            throw new ArgumentNullException(nameof(payment));
+
+        if (_payments.Remove(payment))
+        {
+            payment.UnassignOwner();
+        }
+    }
+
+    // Добавление платежа
+    public Payment AddPayment(int paymentID, float amount, DateTime paymentDate, string paymentMethod, string currency = "USD")
+    {
+        var payment = Payment.Create(paymentID, amount, paymentDate, paymentMethod, this, currency);
+        _payments.Add(payment);
+        return payment;
+    }
+
+    // Обновление платежа
+    public void UpdatePayment(int paymentID, float? newAmount = null, DateTime? newDate = null, string? newMethod = null, string? newCurrency = null)
+    {
+        var payment = _payments.Find(p => p.PaymentID == paymentID);
+        if (payment == null)
+            throw new ArgumentException($"Payment with ID {paymentID} not found.");
+
+        payment.Update(newAmount, newDate, newMethod, newCurrency);
+    }
+
+    // Удаление платежа
+    public void DeletePayment(int paymentID)
+    {
+        var payment = _payments.Find(p => p.PaymentID == paymentID);
+        if (payment == null)
+            throw new ArgumentException($"Payment with ID {paymentID} not found.");
+
+        _payments.Remove(payment);
+        payment.UnassignOwner();
+    }
+    
+    public void AddCertificate(Certificate certificate)
+    {
+        if (certificate == null)
+            throw new ArgumentNullException(nameof(certificate));
+
+        if (!_certificates.Contains(certificate))
+        {
+            _certificates.Add(certificate);
+            certificate.AssignOwner(this);
+        }
+    }
+    
+
+// Метод добавления платежа
+    public void AddPayment(Payment payment)
+    {
+        if (payment == null)
+            throw new ArgumentNullException(nameof(payment));
+
+        if (!_payments.Contains(payment))
+        {
+            _payments.Add(payment);
+            payment.AssignOwner(this);
+        }
+    }
+
+// Метод удаления платежа
+    public void RemovePayment(Payment payment)
+    {
+        if (_payments.Remove(payment))
+        {
+            payment.UnassignOwner();
+        }
+    }
+    public Certificate AssignCertificate(int certificateId, DateTime issueDate)
+    {
+        var certificate = Certificate.Create(certificateId, issueDate, this);
+        _certificates.Add(certificate);
+        return certificate;
+    }
+
+    public void UnassignCertificate(Certificate certificate)
+    {
+        if (certificate == null)
+            throw new ArgumentNullException(nameof(certificate));
+
+        if (_certificates.Remove(certificate))
+        {
+            certificate.UnassignOwner();
+        }
+    }
+
+    
+    // Создаем и добавляем сертификат через фабрику Certificate
+    public Certificate CreateCertificate(int certificateId, DateTime issueDate)
+    {
+        var certificate = Certificate.Create(certificateId, issueDate, this);
+        _certificates.Add(certificate);
+        return certificate;
+    }
+
+    // Удаляем сертификат
+    public void RemoveCertificate(Certificate certificate)
+    {
+        if (_certificates.Contains(certificate))
+        {
+            _certificates.Remove(certificate);
+            certificate.UnassignOwner();
+        }
+    }
+
+    // Метод для отображения всех сертификатов
+    public void ViewCertificates()
+    {
+        foreach (var certificate in _certificates)
+        {
+            certificate.ViewCertificate();
+        }
+    }
+    
+    public void AddReferral(Person referral)
+    {
+        if (referral == null)
+            throw new ArgumentNullException(nameof(referral), "Referral cannot be null.");
+        if (referral == this)
+            throw new InvalidOperationException("A person cannot refer themselves.");
+        if (_referrals.Contains(referral))
+            throw new InvalidOperationException("This referral is already added.");
+        if (referral.ReferredBy != null)
+            throw new InvalidOperationException("This person is already referred by someone else.");
+
+        _referrals.Add(referral);
+        referral.ReferredBy = this;
+    }
+
+    public void RemoveReferral(Person referral)
+    {
+        if (referral == null)
+            throw new ArgumentNullException(nameof(referral), "Referral cannot be null.");
+        if (_referrals.Remove(referral))
+        {
+            referral.ReferredBy = null;
+        }
+    }
+
+    public void RemoveReferredBy()
+    {
+        if (ReferredBy != null)
+        {
+            ReferredBy._referrals.Remove(this);
+            ReferredBy = null;
+        }
+    }
+    
+    public void UpdateProfile(Profile newProfile)
+    {
+        if (newProfile == null)
+            throw new ArgumentNullException(nameof(newProfile), "Profile cannot be null.");
+
+        if (ReferenceEquals(Profile, newProfile))
+            return; // Если профиль уже назначен, ничего не делаем
+
+        // Удаляем старую связь, если она есть
+        if (Profile != null)
+        {
+            var oldProfile = Profile;
+            Profile = null;
+            oldProfile.UnassignPerson();
+        }
+
+        // Назначаем новый профиль
+        Profile = newProfile;
+        newProfile.AssignPerson(this);
+    }
+    
+    public static Person AddPerson(
+        string email,
+        string name,
+        string password,
+        DateTime registrationDate,
+        DateTime birthDate,
+        bool isActive,
+        int balance,
+        Profile profile,
+        Leaderboard leaderboard,
+        Address address,
+        Rank rank,
+        CompletenessLevel completenessLevel,
+        Subscription subscription,
+        List<Certificate>? certificates = null, // Дополнительные сертификаты
+        List<Payment>? payments = null          // Дополнительные платежи
+    )
+    {
+        // Создаем объект Person с базовыми параметрами
+        var person = new Person(
+            email,
+            name,
+            password,
+            registrationDate,
+            birthDate,
+            isActive,
+            balance,
+            leaderboard,
+            address,
+            rank,
+            completenessLevel,
+            subscription,
+            profile
+        );
+
+        // Добавляем сертификаты, если они переданы
+        if (certificates != null)
+        {
+            foreach (var certificate in certificates)
+            {
+                person.AddCertificate(certificate); // Используем AddCertificate вместо AssignCertificate
+            }
+        }
+
+        // Добавляем платежи, если они переданы
+        if (payments != null)
+        {
+            foreach (var payment in payments)
+            {
+                person.AddPayment(payment);
+            }
+        }
+
         return person;
     }
+
+
 
     public static void DeletePerson(Person person)
     {
         if (person == null) throw new ArgumentNullException(nameof(person));
         if (!_extent.Contains(person)) throw new InvalidOperationException("Person not found in the extent.");
-        person.RemoveAddress(); // Удаляем связь с Address перед удалением
+
+        // Удаляем профиль вместе с `Person`
+        person.Profile = null;
         _extent.Remove(person);
     }
 
@@ -183,13 +493,7 @@ public class Person
         if (!address.Persons.Contains(this))
             address.AddPerson(this); // Устанавливаем связь с новым Address
     }
-
-
-
-
-
-
-
+    
     public void RemoveAddress()
     {
         if (Address == null)
@@ -198,6 +502,65 @@ public class Person
         var oldAddress = Address;
         Address = null; // Сбрасываем адрес у текущего объекта Person
         oldAddress.RemovePerson(this); // Убираем связь с объектом Person в Address
+    }
+    
+    
+    // Метод для обновления ранга
+    public void UpdateRank(Rank newRank)
+    {
+        Rank = newRank;
+        Console.WriteLine($"{Name} has been updated to rank level {newRank.RankLevel}.");
+
+        // Синхронизация с Leaderboard
+        Leaderboard?.UpdateRankings(this, newRank.RankLevel, _totalPoints);
+    }
+
+    // Метод для добавления очков
+    public void AddPoints(int points)
+    {
+        if (points < 0)
+            throw new ArgumentException("Points cannot be negative.");
+
+        _totalPoints += points;
+        Console.WriteLine($"{Name} gained {points} points. Total: {_totalPoints}.");
+
+        // Синхронизация с Leaderboard
+        Leaderboard?.UpdateRankings(this, Rank.RankLevel, _totalPoints);
+    }
+
+    // Метод для удаления из Leaderboard
+    public void RemoveFromLeaderboard()
+    {
+        Leaderboard?.RemovePersonFromLeaderboard(this);
+        Leaderboard = null;
+    }
+    
+    // Метод для присвоения профиля
+    public void AssignProfile(Profile profile)
+    {
+        if (profile == null)
+            throw new ArgumentNullException(nameof(profile), "Profile cannot be null.");
+
+        if (Profile != null)
+        {
+            var oldProfile = Profile;
+            Profile = null;
+            oldProfile.UnassignPerson();
+        }
+
+        Profile = profile;
+        profile.AssignPerson(this);
+    }
+
+    // Удаление связи с профилем
+    public void RemoveProfile()
+    {
+        if (Profile != null)
+        {
+            var oldProfile = Profile;
+            Profile = null;
+            oldProfile.UnassignPerson();
+        }
     }
 
 

@@ -19,14 +19,24 @@ public class Attempt
     public Person Person
     {
         get => _person;
-        set => _person = value;
+        private set
+        {
+            _person?.RemoveAttempt(this); // Убираем старую связь
+            _person = value;
+            _person?.AddAttempt(this);   // Устанавливаем новую связь
+        }
     }
 
     [Required(ErrorMessage = "Challenge is required.")]
     public Challenge Challenge
     {
         get => _challenge;
-        set => _challenge = value;
+        private set
+        {
+            _challenge?.RemoveAttempt(this); // Убираем старую связь
+            _challenge = value;
+            _challenge?.AddAttempt(this);   // Устанавливаем новую связь
+        }
     }
 
     [Required(ErrorMessage = "Timestamp is required.")]
@@ -48,17 +58,30 @@ public class Attempt
 
     public Attempt(Person person, Challenge challenge, DateTime timestamp, string result)
     {
-        _person = person;
-        _challenge = challenge;
+        if (person == null) throw new ArgumentNullException(nameof(person));
+        if (challenge == null) throw new ArgumentNullException(nameof(challenge));
+
+        Person = person;
+        Challenge = challenge;
         _timestamp = timestamp;
         _result = result;
 
         _extent.Add(this);
     }
 
-    public void RecordAttempt()
+    public void UpdateAttempt(DateTime? timestamp = null, string? result = null)
     {
-        Console.WriteLine($"attempt recorded at {_timestamp} with result: {_result} for person: {_person.Name} on challenge: {_challenge.ChallengeName}");
+        if (timestamp != null) _timestamp = timestamp.Value;
+        if (result != null) _result = result;
+    }
+
+    public static void DeleteAttempt(Attempt attempt)
+    {
+        if (attempt == null) throw new ArgumentNullException(nameof(attempt));
+
+        attempt.Person = null; // Убираем связь с Person
+        attempt.Challenge = null; // Убираем связь с Challenge
+        _extent.Remove(attempt);
     }
 
     public static void SaveExtent(string filename = "attempt_extent.json")
@@ -70,7 +93,7 @@ public class Attempt
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"error: {ex.Message}");
+            Console.WriteLine($"Error: {ex.Message}");
         }
     }
 
@@ -91,7 +114,7 @@ public class Attempt
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"error: {ex.Message}");
+                Console.WriteLine($"Error: {ex.Message}");
             }
         }
     }
@@ -101,3 +124,4 @@ public class Attempt
         _extent.Clear();
     }
 }
+
