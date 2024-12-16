@@ -103,6 +103,9 @@ public class Person
 
     public IReadOnlyList<Attempt> Attempts => _attempts.AsReadOnly();
 
+    private readonly List<CompletenessLevel> _completenessLevels = new();
+    public IReadOnlyList<CompletenessLevel> CompletenessLevels => _completenessLevels.AsReadOnly();
+    
     
     
     // Добавлен пустой конструктор для десериализации
@@ -364,6 +367,8 @@ public class Person
         }
     }
     
+    
+    
     public void UpdateProfile(Profile newProfile)
     {
         if (newProfile == null)
@@ -563,7 +568,53 @@ public class Person
         }
     }
 
+    public void Delete(List<Leaderboard> leaderboards, List<Course> courses, List<Challenge> challenges)
+    {
+        // Удаляем связи с Leaderboard
+        foreach (var leaderboard in leaderboards)
+        {
+            leaderboard.RemovePerson(this);
+        }
 
+        // Удаляем связи с Course
+        foreach (var course in courses)
+        {
+            course.RemovePerson(this);
+        }
+
+        // Удаляем связи с Challenge
+        foreach (var challenge in challenges)
+        {
+            var attemptsToRemove = _attempts.FindAll(a => a.Challenge == challenge);
+            foreach (var attempt in attemptsToRemove)
+            {
+                Attempt.DeleteAttempt(attempt);
+            }
+        }
+
+        _attempts.Clear(); // Чистим локальные попытки
+        _extent.Remove(this); // Удаляем Person из extent
+    }
+
+
+
+    public void AddToCourse(Course course, int completenessPercentage, DateTime startDate)
+    {
+        if (course == null)
+            throw new ArgumentNullException(nameof(course));
+
+        var completenessLevel = new CompletenessLevel(completenessPercentage, startDate, this, course);
+        _completenessLevels.Add(completenessLevel);
+    }
+
+    public void RemoveFromCourse(Course course)
+    {
+        var level = _completenessLevels.Find(cl => cl.Course == course);
+        if (level != null)
+        {
+            _completenessLevels.Remove(level);
+        }
+    }
     public static void SaveExtent(string filename = "person_extent.json")
     {
         var options = new JsonSerializerOptions

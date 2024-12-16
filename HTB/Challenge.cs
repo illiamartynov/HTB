@@ -81,17 +81,32 @@ public class Challenge
 
     public void AddAttempt(Attempt attempt)
     {
-        if (attempt == null) throw new ArgumentNullException(nameof(attempt));
+        if (attempt == null)
+            throw new ArgumentNullException(nameof(attempt));
+
         if (!_attempts.Contains(attempt))
-        {
             _attempts.Add(attempt);
-        }
     }
 
     public void RemoveAttempt(Attempt attempt)
     {
-        if (attempt == null) throw new ArgumentNullException(nameof(attempt));
+        if (attempt == null)
+            throw new ArgumentNullException(nameof(attempt));
+
         _attempts.Remove(attempt);
+    }
+
+    public static void DeleteChallenge(Challenge challenge)
+    {
+        if (challenge == null)
+            throw new ArgumentNullException(nameof(challenge));
+
+        foreach (var attempt in new List<Attempt>(challenge._attempts))
+        {
+            Attempt.DeleteAttempt(attempt);
+        }
+
+        _extent.Remove(challenge);
     }
 
     public void AddParticipant(Person person)
@@ -128,19 +143,8 @@ public class Challenge
         }
     }
 
-    public static void DeleteChallenge(Challenge challenge)
-    {
-        if (challenge == null) throw new ArgumentNullException(nameof(challenge));
-        foreach (var attempt in challenge._attempts)
-        {
-            Attempt.DeleteAttempt(attempt);
-        }
-        foreach (var participant in challenge._participants)
-        {
-            participant.RemoveChallenge(challenge);
-        }
-        _extent.Remove(challenge);
-    }
+    
+    
 }
 
 }

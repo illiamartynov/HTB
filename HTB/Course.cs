@@ -42,6 +42,8 @@ namespace HTB
         }
 
         public IReadOnlyList<Lesson> Lessons => _lessons.AsReadOnly();
+        private readonly List<CompletenessLevel> _completenessLevels = new();
+        public IReadOnlyList<CompletenessLevel> CompletenessLevels => _completenessLevels.AsReadOnly();
 
         public Course(string courseName, string difficultyLevel, IAccessType accessType)
         {
@@ -91,11 +93,32 @@ namespace HTB
         // Удаление курса с обработкой двусторонних связей
         public static void DeleteCourse(Course course)
         {
-            if (course == null) throw new ArgumentNullException(nameof(course));
+            if (course == null)
+                throw new ArgumentNullException(nameof(course));
 
-            course.ClearLessons();
+            course._completenessLevels.Clear();
             _extent.Remove(course);
         }
+        
+        public void AddPerson(Person person, int completenessPercentage, DateTime startDate)
+        {
+            if (person == null)
+                throw new ArgumentNullException(nameof(person));
+
+            var completenessLevel = new CompletenessLevel(completenessPercentage, startDate, person, this);
+            _completenessLevels.Add(completenessLevel);
+        }
+
+        public void RemovePerson(Person person)
+        {
+            var level = _completenessLevels.Find(cl => cl.Person == person);
+            if (level != null)
+            {
+                _completenessLevels.Remove(level);
+            }
+        }
+
+        
 
         public static void SaveExtent(string filename = "course_extent.json")
         {

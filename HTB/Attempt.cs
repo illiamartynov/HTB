@@ -58,13 +58,13 @@ public class Attempt
 
     public Attempt(Person person, Challenge challenge, DateTime timestamp, string result)
     {
-        if (person == null) throw new ArgumentNullException(nameof(person));
-        if (challenge == null) throw new ArgumentNullException(nameof(challenge));
+        Person = person ?? throw new ArgumentNullException(nameof(person));
+        Challenge = challenge ?? throw new ArgumentNullException(nameof(challenge));
+        Timestamp = timestamp;
+        Result = result ?? throw new ArgumentNullException(nameof(result));
 
-        Person = person;
-        Challenge = challenge;
-        _timestamp = timestamp;
-        _result = result;
+        Person.AddAttempt(this);
+        Challenge.AddAttempt(this);
 
         _extent.Add(this);
     }
@@ -77,10 +77,11 @@ public class Attempt
 
     public static void DeleteAttempt(Attempt attempt)
     {
-        if (attempt == null) throw new ArgumentNullException(nameof(attempt));
+        if (attempt == null)
+            throw new ArgumentNullException(nameof(attempt));
 
-        attempt.Person = null; // Убираем связь с Person
-        attempt.Challenge = null; // Убираем связь с Challenge
+        attempt.Person.RemoveAttempt(attempt);
+        attempt.Challenge.RemoveAttempt(attempt);
         _extent.Remove(attempt);
     }
 

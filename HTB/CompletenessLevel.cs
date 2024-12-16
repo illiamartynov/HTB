@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using HTB;
 
 public class CompletenessLevel
 {
@@ -8,44 +9,39 @@ public class CompletenessLevel
 
     [Required(ErrorMessage = "Completeness percentage is required.")]
     [Range(0, 100, ErrorMessage = "Completeness percentage must be between 0 and 100.")]
-    public int CompletenessPercentage
-    {
-        get => _completenessPercentage;
-        set
-        {
-            if (value >= 0 && value <= 100)
-                _completenessPercentage = value;
-            else
-                Console.WriteLine("Invalid percentage value. Must be between 0 and 100.");
-        }
-    }
+    public int CompletenessPercentage { get; private set; }
 
     [Required(ErrorMessage = "Start date is required.")]
-    [DataType(DataType.Date, ErrorMessage = "Start date must be a valid date.")]
-    public DateTime StartDate
-    {
-        get => _startDate;
-        set => _startDate = value;
-    }
+    public DateTime StartDate { get; private set; }
+    
+    [Required]
+    public Person Person { get; private set; }
 
-    public CompletenessLevel(int completenessPercentage, DateTime startDate)
+    [Required]
+    public Course Course { get; private set; }
+
+    public CompletenessLevel(int completenessPercentage, DateTime startDate, Person person, Course course)
     {
-        _completenessPercentage = completenessPercentage >= 0 && completenessPercentage <= 100
-            ? completenessPercentage
-            : throw new ArgumentException("Completeness percentage must be between 0 and 100.");
-        _startDate = startDate;
+        if (completenessPercentage < 0 || completenessPercentage > 100)
+            throw new ArgumentException("Completeness percentage must be between 0 and 100.");
+
+        CompletenessPercentage = completenessPercentage;
+        StartDate = startDate;
+        Person = person ?? throw new ArgumentNullException(nameof(person));
+        Course = course ?? throw new ArgumentNullException(nameof(course));
     }
+    
 
     public void UpdateCompleteness(int newPercentage)
     {
         if (newPercentage >= 0 && newPercentage <= 100)
         {
-            _completenessPercentage = newPercentage;
+            CompletenessPercentage = newPercentage;
             Console.WriteLine($"Completeness updated to {newPercentage}%.");
         }
         else
         {
-            Console.WriteLine("Invalid percentage value. Must be between 0 and 100.");
+            throw new ArgumentException("Invalid percentage value. Must be between 0 and 100.");
         }
     }
 }
