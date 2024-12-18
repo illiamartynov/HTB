@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HTBTests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+49eaab5285a75c741bcd17d36a441b23d530e471")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+957ad3dd312c665dc97a3ea135b3d536001e44c5")]
 [assembly: System.Reflection.AssemblyProductAttribute("HTBTests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HTBTests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

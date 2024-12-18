@@ -67,23 +67,16 @@ public class Person
 
     private List<Payment> _payments = new List<Payment>();
 
-    [Required(ErrorMessage = "Leaderboard is required.")]
-    public Leaderboard Leaderboard { get; private set; }
-
     public IReadOnlyList<Person> ReferredUsers => _referredUsers.AsReadOnly();
 
     private List<Person> _referredUsers = new List<Person>();
 
-    [Required(ErrorMessage = "Subscription is required.")]
-    public Subscription Subscription { get; private set; }
+    private List<Subscription> _subscriptions = new List<Subscription>();
+    public IReadOnlyList<Subscription> Subscriptions => _subscriptions.AsReadOnly();
 
-    public IReadOnlyList<Course> Courses => _courses.AsReadOnly();
+    
 
-    private List<Course> _courses = new List<Course>();
 
-    public IReadOnlyList<Challenge> Challenges => _challenges.AsReadOnly();
-
-    private List<Challenge> _challenges = new List<Challenge>();
 
     // Рефлексивная ассоциация
     private List<Person> _referrals = new List<Person>();
@@ -122,11 +115,9 @@ public class Person
         DateTime birthDate,
         bool isActive,
         int balance,
-        Leaderboard leaderboard,
         Address address,
         Rank rank,
         CompletenessLevel completenessLevel,
-        Subscription subscription,
         Profile profile,
         List<Certificate>? certificates = null,
         List<Payment>? payments = null
@@ -141,11 +132,9 @@ public class Person
         Balance = balance;
 
         AssignProfile(profile);
-        Leaderboard = leaderboard;
         AssignAddress(address);
         Rank = rank;
         CompletenessLevel = completenessLevel;
-        Subscription = subscription;
 
         // Добавление сертификатов
         if (certificates != null)
@@ -169,6 +158,7 @@ public class Person
     }
 
 
+
     // Метод для добавления попытки
     public void AddAttempt(Attempt attempt)
     {
@@ -187,24 +177,7 @@ public class Person
     }
     
 
-    public void AddChallenge(Challenge challenge)
-    {
-        if (challenge == null) throw new ArgumentNullException(nameof(challenge));
-        if (!_challenges.Contains(challenge))
-        {
-            _challenges.Add(challenge);
-            challenge.AddParticipant(this); // Устанавливаем связь
-        }
-    }
-
-    public void RemoveChallenge(Challenge challenge)
-    {
-        if (challenge == null) throw new ArgumentNullException(nameof(challenge));
-        if (_challenges.Remove(challenge))
-        {
-            challenge.RemoveParticipant(this); // Удаляем связь
-        }
-    }
+    
     
     public Payment AssignPayment(int paymentID, float amount, DateTime paymentDate, string paymentMethod, string currency = "USD")
     {
@@ -367,6 +340,30 @@ public class Person
         }
     }
     
+    public void UpdateReferredBy(Person newReferrer)
+    {
+        if (newReferrer == null)
+            throw new ArgumentNullException(nameof(newReferrer), "Referrer cannot be null.");
+    
+        if (newReferrer == this)
+            throw new InvalidOperationException("A person cannot refer themselves.");
+    
+        // Удаляем старую связь, если она существует
+        if (ReferredBy != null)
+        {
+            ReferredBy._referrals.Remove(this);
+        }
+
+        // Обновляем ссылку
+        ReferredBy = newReferrer;
+
+        // Добавляем текущий объект в список рефералов нового реферера
+        if (!newReferrer._referrals.Contains(this))
+        {
+            newReferrer._referrals.Add(this);
+        }
+    }
+
     
     
     public void UpdateProfile(Profile newProfile)
@@ -399,7 +396,6 @@ public class Person
         bool isActive,
         int balance,
         Profile profile,
-        Leaderboard leaderboard,
         Address address,
         Rank rank,
         CompletenessLevel completenessLevel,
@@ -417,11 +413,9 @@ public class Person
             birthDate,
             isActive,
             balance,
-            leaderboard,
             address,
             rank,
             completenessLevel,
-            subscription,
             profile
         );
 
@@ -516,8 +510,6 @@ public class Person
         Rank = newRank;
         Console.WriteLine($"{Name} has been updated to rank level {newRank.RankLevel}.");
 
-        // Синхронизация с Leaderboard
-        Leaderboard?.UpdateRankings(this, newRank.RankLevel, _totalPoints);
     }
 
     // Метод для добавления очков
@@ -529,16 +521,9 @@ public class Person
         _totalPoints += points;
         Console.WriteLine($"{Name} gained {points} points. Total: {_totalPoints}.");
 
-        // Синхронизация с Leaderboard
-        Leaderboard?.UpdateRankings(this, Rank.RankLevel, _totalPoints);
     }
 
-    // Метод для удаления из Leaderboard
-    public void RemoveFromLeaderboard()
-    {
-        Leaderboard?.RemovePersonFromLeaderboard(this);
-        Leaderboard = null;
-    }
+    
     
     // Метод для присвоения профиля
     public void AssignProfile(Profile profile)
@@ -567,54 +552,32 @@ public class Person
             oldProfile.UnassignPerson();
         }
     }
-
-    public void Delete(List<Leaderboard> leaderboards, List<Course> courses, List<Challenge> challenges)
+    
+    public void AddSubscription(Subscription subscription)
     {
-        // Удаляем связи с Leaderboard
-        foreach (var leaderboard in leaderboards)
-        {
-            leaderboard.RemovePerson(this);
-        }
+        if (subscription == null)
+            throw new ArgumentNullException(nameof(subscription), "Subscription cannot be null.");
 
-        // Удаляем связи с Course
-        foreach (var course in courses)
+        if (!_subscriptions.Contains(subscription))
         {
-            course.RemovePerson(this);
+            _subscriptions.Add(subscription);
+            subscription.AddPerson(this); // Двусторонняя связь
         }
+    }
+    
+    public void RemoveSubscription(Subscription subscription)
+    {
+        if (subscription == null)
+            throw new ArgumentNullException(nameof(subscription), "Subscription cannot be null.");
 
-        // Удаляем связи с Challenge
-        foreach (var challenge in challenges)
+        if (_subscriptions.Remove(subscription))
         {
-            var attemptsToRemove = _attempts.FindAll(a => a.Challenge == challenge);
-            foreach (var attempt in attemptsToRemove)
-            {
-                Attempt.DeleteAttempt(attempt);
-            }
+            subscription.RemovePerson(this); // Удаляем связь из Subscription
         }
-
-        _attempts.Clear(); // Чистим локальные попытки
-        _extent.Remove(this); // Удаляем Person из extent
     }
 
 
-
-    public void AddToCourse(Course course, int completenessPercentage, DateTime startDate)
-    {
-        if (course == null)
-            throw new ArgumentNullException(nameof(course));
-
-        var completenessLevel = new CompletenessLevel(completenessPercentage, startDate, this, course);
-        _completenessLevels.Add(completenessLevel);
-    }
-
-    public void RemoveFromCourse(Course course)
-    {
-        var level = _completenessLevels.Find(cl => cl.Course == course);
-        if (level != null)
-        {
-            _completenessLevels.Remove(level);
-        }
-    }
+    
     public static void SaveExtent(string filename = "person_extent.json")
     {
         var options = new JsonSerializerOptions
@@ -678,12 +641,5 @@ public class Person
     {
         return Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(password));
     }
-    public void AddCourse(Course course)
-    {
-        if (course != null && !_courses.Contains(course))
-        {
-            _courses.Add(course);
-            Console.WriteLine($"{Name} enrolled in course: {course.CourseName}");
-        }
-    }
+    
 }

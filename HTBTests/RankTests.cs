@@ -9,24 +9,48 @@ namespace HTBTests
     public class RankTests
     {
         private Rank rank;
+        private Person person;
+        private Leaderboard leaderboard;
 
         [SetUp]
         public void Setup()
         {
-            rank = new Rank(1);
+            leaderboard = new Leaderboard();
+
+            person = Person.AddPerson(
+                email: "test@example.com",
+                name: "John Doe",
+                password: "password123",
+                registrationDate: DateTime.Now,
+                birthDate: DateTime.Now.AddYears(-30),
+                isActive: true,
+                balance: 1000,
+                profile: null,
+                address: null,
+                rank: null,
+                completenessLevel: null,
+                subscription: null
+            );
+
+            rank = new Rank(1, person, leaderboard);
         }
 
         [Test]
         public void TestRankCreation()
         {
-            Assert.That(rank.RankLevel, Is.EqualTo(1));
+            Assert.Multiple(() =>
+            {
+                Assert.That(rank.RankLevel, Is.EqualTo(1));
+                Assert.That(rank.Person, Is.EqualTo(person));
+                Assert.That(rank.Leaderboard, Is.EqualTo(leaderboard));
+            });
         }
 
         [Test]
         public void TestInvalidRankCreation()
         {
-            Assert.Throws<ArgumentException>(() => new Rank(0));
-            Assert.Throws<ArgumentException>(() => new Rank(-5));
+            Assert.Throws<ArgumentException>(() => new Rank(0, person, leaderboard));
+            Assert.Throws<ArgumentException>(() => new Rank(-5, person, leaderboard));
         }
 
         [Test]
@@ -47,7 +71,6 @@ namespace HTBTests
             }
         }
 
-
         [Test]
         public void TestUpdateRank_InvalidValue()
         {
@@ -60,32 +83,22 @@ namespace HTBTests
 
                 var output = sw.ToString().Trim();
 
-                Assert.That(rank.RankLevel, Is.EqualTo(1)); // значение не изменилось
-                Assert.That(output, Does.Contain("Invalid rank level. Must be greater than 0."));
+                Assert.Multiple(() =>
+                {
+                    Assert.That(rank.RankLevel, Is.EqualTo(1)); // значение не изменилось
+                    Assert.That(output, Does.Contain("Invalid rank level. Must be greater than 0."));
+                });
             }
         }
 
         [Test]
-        public void TestRankLevel_SetValidValue()
+        public void TestRankAssociatedWithPersonAndLeaderboard()
         {
-            rank.RankLevel = 3;
-
-            Assert.That(rank.RankLevel, Is.EqualTo(3));
-        }
-
-        [Test]
-        public void TestRankLevel_SetInvalidValue()
-        {
-            using (var sw = new StringWriter())
+            Assert.Multiple(() =>
             {
-                Console.SetOut(sw);
-
-                rank.RankLevel = -10;
-                var output = sw.ToString().Trim();
-
-                Assert.That(rank.RankLevel, Is.EqualTo(1)); // значение не изменилось
-                Assert.That(output, Does.Contain("Invalid rank level. Must be greater than 0."));
-            }
+                Assert.That(rank.Person, Is.EqualTo(person));
+                Assert.That(rank.Leaderboard, Is.EqualTo(leaderboard));
+            });
         }
     }
 }

@@ -100,23 +100,9 @@ namespace HTB
             _extent.Remove(course);
         }
         
-        public void AddPerson(Person person, int completenessPercentage, DateTime startDate)
-        {
-            if (person == null)
-                throw new ArgumentNullException(nameof(person));
+        
 
-            var completenessLevel = new CompletenessLevel(completenessPercentage, startDate, person, this);
-            _completenessLevels.Add(completenessLevel);
-        }
-
-        public void RemovePerson(Person person)
-        {
-            var level = _completenessLevels.Find(cl => cl.Person == person);
-            if (level != null)
-            {
-                _completenessLevels.Remove(level);
-            }
-        }
+       
 
         
 

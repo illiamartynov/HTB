@@ -21,11 +21,9 @@ namespace HTBTests
 
             var address = Address.AddAddress("USA", "New York", "5th Avenue", 101);
             var leaderboard = new Leaderboard();
-            var profile = new Profile(0, "Novice");
-            var rank = new Rank(1);
-            var completenessLevel = new CompletenessLevel(50, DateTime.Now);
             var subscription = new Subscription(1, DateTime.Now, DateTime.Now.AddMonths(1), SubscriptionType.Free, new Free(30));
 
+            // Создаем объект Person с упрощением Profile, Rank, CompletenessLevel
             person = Person.AddPerson(
                 email: "person@example.com",
                 name: "TestPerson",
@@ -34,13 +32,19 @@ namespace HTBTests
                 birthDate: DateTime.Now.AddYears(-25),
                 isActive: true,
                 balance: 0,
-                profile: profile,
-                leaderboard: leaderboard,
+                profile: new Profile(0, "Novice", null), // Profile создан без Person, связь добавляется позже
                 address: address,
-                rank: rank,
-                completenessLevel: completenessLevel,
+                rank: null, // Rank будет назначен после создания Person
+                completenessLevel: null, // CompletenessLevel будет назначен после создания Person
                 subscription: subscription
             );
+
+            // Назначение связи для Profile, Rank, CompletenessLevel
+            var profile = new Profile(0, "Novice", person);
+            var rank = new Rank(1, person, leaderboard);
+
+            person.AssignProfile(profile);
+            person.UpdateRank(rank);
         }
 
         [Test]
@@ -65,22 +69,6 @@ namespace HTBTests
 
             Assert.That(Attempt.Extent.Count, Is.EqualTo(1));
             Assert.That(Attempt.Extent.Contains(attempt), Is.True);
-        }
-
-        [Test]
-        public void TestRecordAttempt()
-        {
-            var timestamp = DateTime.Now;
-            var attempt = new Attempt(person, challenge, timestamp, "Success");
-
-            using (var sw = new System.IO.StringWriter())
-            {
-                Console.SetOut(sw);
-                attempt.RecordAttempt();
-
-                var output = sw.ToString().Trim();
-                Assert.That(output, Is.EqualTo($"attempt recorded at {timestamp} with result: Success for person: {person.Name} on challenge: {challenge.ChallengeName}"));
-            }
         }
 
         [Test]

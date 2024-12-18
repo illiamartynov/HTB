@@ -16,13 +16,14 @@ namespace HTBTests
         {
             Course.ClearExtent();
             Person.ClearExtent();
-            
-            course = new Course("Nmap", "Intermediate", new OSINT("Network Scanning"), new Free(30));
+
+            var accessType = new Free(30);
+            course = new Course("Nmap Basics", "Intermediate", accessType);
+
             var address = Address.AddAddress("USA", "New York", "5th Avenue", 10);
-            var profile = new Profile(500, "Intermediate");
-            var rank = new Rank(1);
-            var completenessLevel = new CompletenessLevel(80, DateTime.Now);
-            var subscription = new Subscription(1, DateTime.Now, DateTime.Now.AddMonths(1), SubscriptionType.Free, new Free(30));
+            var profile = new Profile(500, "Intermediate", null);
+            var rank = new Rank(1, null, new Leaderboard());
+            var completenessLevel = new CompletenessLevel(80, DateTime.Now, null, course);
 
             person = Person.AddPerson(
                 email: "user@example.com",
@@ -33,49 +34,70 @@ namespace HTBTests
                 isActive: true,
                 balance: 500,
                 profile: profile,
-                leaderboard: new Leaderboard(),
                 address: address,
                 rank: rank,
                 completenessLevel: completenessLevel,
-                subscription: subscription
+                subscription: null
             );
         }
 
         [Test]
-        public void TestPersonEnrollsInCourse()
+        public void TestCourseCreation()
         {
-            using (var sw = new StringWriter())
+            Assert.Multiple(() =>
             {
-                TextWriter originalOutput = Console.Out;
-                Console.SetOut(sw);
-
-                person.AddCourse(course);
-
-                Console.SetOut(originalOutput);
-                var result = sw.ToString().Trim();
-
-                Assert.Multiple(() =>
-                {
-                    Assert.That(result, Does.Contain("UserTest enrolled in course: Nmap"));
-                    Assert.That(person.Courses.Contains(course), Is.True, "The course should be added to the person's list.");
-                });
-            }
+                Assert.That(course.CourseName, Is.EqualTo("Nmap Basics"));
+                Assert.That(course.DifficultyLevel, Is.EqualTo("Intermediate"));
+                Assert.That(course.AccessType.GetAccessDescription(), Is.EqualTo("Free access for 30 days."));
+            });
         }
 
         [Test]
-        public void TestPersonCompletesCourse()
+        public void TestAddLessonToCourse()
         {
-            using (var sw = new StringWriter())
+            var lesson = new Lesson("Port Scanning Basics", "Learn how to scan ports using Nmap");
+            course.AddLesson(lesson);
+
+            Assert.Multiple(() =>
             {
-                TextWriter originalOutput = Console.Out;
-                Console.SetOut(sw);
+                Assert.That(course.Lessons, Contains.Item(lesson));
+                Assert.That(lesson.Course, Is.EqualTo(course));
+            });
+        }
 
-                person.AddCourse(course);
+        [Test]
+        public void TestRemoveLessonFromCourse()
+        {
+            var lesson = new Lesson("Port Scanning Basics", "Learn how to scan ports using Nmap");
+            course.AddLesson(lesson);
+            course.RemoveLesson(lesson);
 
-                Console.SetOut(originalOutput);
-                var result = sw.ToString().Trim();
-                Assert.That(result, Does.Contain("UserTest enrolled in course: Nmap"));
-            }
+            Assert.Multiple(() =>
+            {
+                Assert.That(course.Lessons, Does.Not.Contain(lesson));
+                Assert.That(lesson.Course, Is.Null);
+            });
+        }
+
+        [Test]
+        public void TestClearLessonsFromCourse()
+        {
+            var lesson1 = new Lesson("Port Scanning Basics", "Learn how to scan ports using Nmap");
+            var lesson2 = new Lesson("Service Detection", "Understand how to identify running services");
+            course.AddLesson(lesson1);
+            course.AddLesson(lesson2);
+
+            course.ClearLessons();
+
+            Assert.That(course.Lessons, Is.Empty);
+        }
+
+        [Test]
+        public void TestDeleteCourse()
+        {
+            Course.DeleteCourse(course);
+
+            Assert.That(Course.Extent, Does.Not.Contain(course));
         }
     }
 }

@@ -57,6 +57,10 @@ namespace HTB
             get => _type;
             set => _type = value;
         }
+        
+        private List<Person> _persons = new List<Person>();
+        public IReadOnlyList<Person> Persons => _persons.AsReadOnly();
+
 
         public Subscription(int subscriptionID, DateTime startDate, DateTime endDate, SubscriptionType type, IAccessType accessType)
         {
@@ -75,6 +79,26 @@ namespace HTB
             Console.WriteLine($"Access Details: {AccessType.GetAccessDescription()}");
             Console.WriteLine($"Duration: {_startDate} - {_endDate}");
         }
+        public void AddPerson(Person person)
+        {
+            if (person == null)
+                throw new ArgumentNullException(nameof(person), "Person cannot be null.");
+
+            if (!_persons.Contains(person))
+            {
+                _persons.Add(person);
+                person.AddSubscription(this); // Двусторонняя связь
+            }
+        }
+
+        public void RemovePerson(Person person)
+        {
+            if (person == null)
+                throw new ArgumentNullException(nameof(person), "Person cannot be null.");
+
+            _persons.Remove(person);
+        }
+
 
         public static void SaveExtent(string filename = "subscription_extent.json")
         {

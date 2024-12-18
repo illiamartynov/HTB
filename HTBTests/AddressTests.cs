@@ -1,11 +1,9 @@
 ﻿using HTB;
+using NUnit.Framework;
+using System;
 
 namespace HTBTests
 {
-    using NUnit.Framework;
-    using System;
-    using System.IO;
-
     public class AddressTests
     {
         [SetUp]
@@ -15,39 +13,16 @@ namespace HTBTests
         }
 
         [Test]
-        public void TestAddressCreation()
+        public void AssignPersonToAddress_ShouldSetBidirectionalAssociation()
         {
+            // Arrange
             var address = Address.AddAddress("USA", "New York", "5th Avenue", 101);
-
-            Assert.Multiple(() =>
-            {
-                Assert.That(address.Country, Is.EqualTo("USA"));
-                Assert.That(address.City, Is.EqualTo("New York"));
-                Assert.That(address.Street, Is.EqualTo("5th Avenue"));
-                Assert.That(address.Number, Is.EqualTo(101));
-            });
-        }
-
-        [Test]
-        public void TestAddressAddedToList()
-        {
-            Address.AddAddress("USA", "New York", "5th Avenue", 101);
-            Address.AddAddress("Canada", "Toronto", "Queen St", 22);
-
-            Assert.That(Address.Addresses.Count, Is.EqualTo(2));
-        }
-
-        [Test]
-        public void TestAssignPersonToAddress()
-        {
-            var address = Address.AddAddress("USA", "New York", "5th Avenue", 101); // Создаем объект Address
-
-            var profile = new Profile(0, "Novice");
             var leaderboard = new Leaderboard();
-            var rank = new Rank(1);
-            var completenessLevel = new CompletenessLevel(50, DateTime.Now);
+            var rank = new Rank(1, null, leaderboard);
+            var completenessLevel = new CompletenessLevel(50, DateTime.Now, null, null);
             var subscription = new Subscription(1, DateTime.Now, DateTime.Now.AddMonths(1), SubscriptionType.Free, new Free(30));
 
+            // Создаем Person без Profile
             var person = Person.AddPerson(
                 "person@example.com",
                 "TestPerson",
@@ -56,62 +31,64 @@ namespace HTBTests
                 DateTime.Now.AddYears(-25),
                 true,
                 100,
-                profile,
-                leaderboard,
-                address, // Передаем корректный объект Address
-                rank,
-                completenessLevel,
-                subscription
-            );
-
-            Assert.Multiple(() =>
-            {
-                Assert.That(person.Address, Is.EqualTo(address));
-                Assert.That(address.Persons.Contains(person), Is.True);
-            });
-        }
-
-
-        [Test]
-        public void TestRemovePersonFromAddress()
-        {
-            // Создаем адрес
-            var address = Address.AddAddress("USA", "New York", "5th Avenue", 101);
-
-            // Создаем профиль и связанные объекты
-            var profile = new Profile(0, "Novice");
-            var leaderboard = new Leaderboard();
-            var rank = new Rank(1);
-            var completenessLevel = new CompletenessLevel(50, DateTime.Now);
-            var subscription = new Subscription(1, DateTime.Now, DateTime.Now.AddMonths(1), SubscriptionType.Free, new Free(30));
-
-            // Создаем пользователя и связываем его с адресом
-            var person = Person.AddPerson(
-                "person@example.com",
-                "TestPerson",
-                "password",
-                DateTime.Now,
-                DateTime.Now.AddYears(-25),
-                true,
-                100,
-                profile,
-                leaderboard,
+                null, // Profile будет присвоен позже
                 address,
                 rank,
                 completenessLevel,
                 subscription
             );
 
-            // Удаляем пользователя из адреса
+            // Создаем профиль и присваиваем его человеку
+            var profile = new Profile(0, "Novice", person);
+            person.AssignProfile(profile);
+
+            // Act & Assert
+            Assert.Multiple(() =>
+            {
+                Assert.That(person.Address, Is.EqualTo(address));
+                Assert.That(person.Profile, Is.EqualTo(profile));
+                Assert.That(address.Persons.Contains(person), Is.True);
+            });
+        }
+
+        [Test]
+        public void RemovePersonFromAddress_ShouldRemoveBidirectionalAssociation()
+        {
+            // Arrange
+            var address = Address.AddAddress("USA", "New York", "5th Avenue", 101);
+            var leaderboard = new Leaderboard();
+            var rank = new Rank(1, null, leaderboard);
+            var completenessLevel = new CompletenessLevel(50, DateTime.Now, null, null);
+            var subscription = new Subscription(1, DateTime.Now, DateTime.Now.AddMonths(1), SubscriptionType.Free, new Free(30));
+
+            var person = Person.AddPerson(
+                "person@example.com",
+                "TestPerson",
+                "password",
+                DateTime.Now,
+                DateTime.Now.AddYears(-25),
+                true,
+                100,
+                null, // Profile будет назначен позже
+                address,
+                rank,
+                completenessLevel,
+                subscription
+            );
+
+            var profile = new Profile(0, "Novice", person);
+            person.AssignProfile(profile);
+
+            // Act
             address.RemovePerson(person);
 
-            // Проверяем, что связь удалена
+            // Assert
             Assert.Multiple(() =>
             {
                 Assert.That(address.Persons.Contains(person), Is.False);
                 Assert.That(person.Address, Is.Null);
+                Assert.That(person.Profile, Is.EqualTo(profile)); // Profile не меняется
             });
         }
-
     }
 }

@@ -16,12 +16,14 @@ namespace HTBTests
             Challenge.Extent.Clear();
             challenge = new Challenge("Buffer Overflow", "Hard", "Exploit a buffer overflow", 100, ChallengeStatus.NotTried);
 
-            
             var address = Address.AddAddress("USA", "New York", "5th Avenue", 101);
-            var profile = new Profile(0, "Novice");
-            var rank = new Rank(1);
-            var completenessLevel = new CompletenessLevel(50, DateTime.Now);
-            var subscription = new Subscription(1, DateTime.Now, DateTime.Now.AddMonths(1), SubscriptionType.Free, new Free(30));
+            var leaderboard = new Leaderboard(); // Replace with valid Leaderboard instance as needed
+            var accessType = new Free(30);
+            var course = new Course("Intro to Exploits", "Intermediate", accessType);
+            var completenessLevel = new CompletenessLevel(50, DateTime.Now, null, course);
+            var profile = new Profile(0, "Novice", null); // Adjust Person assignment later
+            var rank = new Rank(1, null, leaderboard);
+            var subscription = new Subscription(1, DateTime.Now, DateTime.Now.AddMonths(1), SubscriptionType.Free, accessType);
 
             person = Person.AddPerson(
                 email: "person@example.com",
@@ -32,7 +34,6 @@ namespace HTBTests
                 isActive: true,
                 balance: 0,
                 profile: profile,
-                leaderboard: new Leaderboard(),
                 address: address,
                 rank: rank,
                 completenessLevel: completenessLevel,
@@ -57,12 +58,38 @@ namespace HTBTests
         {
             var attempt = new Attempt(person, challenge, DateTime.Now, "Success");
 
+            challenge.AddAttempt(attempt);
+
             Assert.Multiple(() =>
             {
+                Assert.That(challenge.Attempts, Contains.Item(attempt));
                 Assert.That(attempt.Result, Is.EqualTo("Success"));
                 Assert.That(attempt.Challenge, Is.EqualTo(challenge));
                 Assert.That(attempt.Person, Is.EqualTo(person));
             });
+        }
+
+        [Test]
+        public void TestRemoveAttempt()
+        {
+            var attempt = new Attempt(person, challenge, DateTime.Now, "Failed");
+            challenge.AddAttempt(attempt);
+
+            challenge.RemoveAttempt(attempt);
+
+            Assert.That(challenge.Attempts, Does.Not.Contain(attempt));
+        }
+
+        [Test]
+        public void TestDeleteChallenge()
+        {
+            var attempt = new Attempt(person, challenge, DateTime.Now, "Success");
+            challenge.AddAttempt(attempt);
+
+            Challenge.DeleteChallenge(challenge);
+
+            Assert.That(Challenge.Extent, Does.Not.Contain(challenge));
+            Assert.That(challenge.Attempts, Is.Empty);
         }
     }
 }

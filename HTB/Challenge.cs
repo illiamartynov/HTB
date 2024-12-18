@@ -23,7 +23,6 @@ public class Challenge
     private int _points;
     private ChallengeStatus _status;
     private List<Attempt> _attempts = new List<Attempt>();
-    private List<Person> _participants = new List<Person>(); // Ассоциация с Person
 
     public static List<Challenge> Extent => _extent;
 
@@ -67,7 +66,6 @@ public class Challenge
     }
 
     public IReadOnlyList<Attempt> Attempts => _attempts.AsReadOnly();
-    public IReadOnlyList<Person> Participants => _participants.AsReadOnly();
 
     public Challenge(string challengeName, string difficulty, string description, int points, ChallengeStatus status)
     {
@@ -109,24 +107,7 @@ public class Challenge
         _extent.Remove(challenge);
     }
 
-    public void AddParticipant(Person person)
-    {
-        if (person == null) throw new ArgumentNullException(nameof(person));
-        if (!_participants.Contains(person))
-        {
-            _participants.Add(person);
-            person.AddChallenge(this);
-        }
-    }
-
-    public void RemoveParticipant(Person person)
-    {
-        if (person == null) throw new ArgumentNullException(nameof(person));
-        if (_participants.Remove(person))
-        {
-            person.RemoveChallenge(this);
-        }
-    }
+    
 
     public static void SaveExtent(string filename = "challenge_extent.json")
     {
