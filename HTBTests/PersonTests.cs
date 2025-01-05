@@ -58,22 +58,24 @@ namespace HTBTests
         }
 
         [Test]
-        public void TestAddCertificate()
+        public void AddCertificate_ShouldAddCertificateToPerson()
         {
-            var certificate = Certificate.Create(1, DateTime.Now, person);
+            var certificate = new Certificate(1, DateTime.Now, person);
+
             person.AddCertificate(certificate);
 
-            Assert.That(person.Certificates, Contains.Item(certificate));
+            Assert.Contains(certificate, person.Certificates.ToList());
         }
-
+        
         [Test]
-        public void TestRemoveCertificate()
+        public void RemoveCertificate_ShouldRemoveCertificateFromPerson()
         {
-            var certificate = Certificate.Create(1, DateTime.Now, person);
+            var certificate = new Certificate(1, DateTime.Now, person);
             person.AddCertificate(certificate);
+
             person.RemoveCertificate(certificate);
 
-            Assert.That(person.Certificates, Does.Not.Contain(certificate));
+            Assert.IsFalse(person.Certificates.Contains(certificate));
         }
 
         [Test]

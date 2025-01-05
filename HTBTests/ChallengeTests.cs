@@ -13,7 +13,6 @@ namespace HTBTests
         [SetUp]
         public void Setup()
         {
-            Challenge.Extent.Clear();
             challenge = new Challenge("Buffer Overflow", "Hard", "Exploit a buffer overflow", 100, ChallengeStatus.NotTried);
 
             var address = Address.AddAddress("USA", "New York", "5th Avenue", 101);
@@ -56,9 +55,7 @@ namespace HTBTests
         [Test]
         public void TestAddAttempt()
         {
-            var attempt = new Attempt(person, challenge, DateTime.Now, "Success");
-
-            challenge.AddAttempt(attempt);
+            Attempt attempt = challenge.AddAttempt("Success", person);
 
             Assert.Multiple(() =>
             {
@@ -72,8 +69,7 @@ namespace HTBTests
         [Test]
         public void TestRemoveAttempt()
         {
-            var attempt = new Attempt(person, challenge, DateTime.Now, "Failed");
-            challenge.AddAttempt(attempt);
+            Attempt attempt = challenge.AddAttempt("Failed", person);
 
             challenge.RemoveAttempt(attempt);
 
@@ -83,8 +79,7 @@ namespace HTBTests
         [Test]
         public void TestDeleteChallenge()
         {
-            var attempt = new Attempt(person, challenge, DateTime.Now, "Success");
-            challenge.AddAttempt(attempt);
+            challenge.AddAttempt("Success", person);
 
             Challenge.DeleteChallenge(challenge);
 

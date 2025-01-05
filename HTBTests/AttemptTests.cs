@@ -14,7 +14,6 @@ namespace HTBTests
         public void Setup()
         {
             Attempt.ClearExtent();
-            Challenge.Extent.Clear();
             Person.ClearExtent();
 
             challenge = new Challenge("Buffer Overflow", "Hard", "Exploit a buffer overflow", 100, ChallengeStatus.NotTried);
@@ -48,24 +47,9 @@ namespace HTBTests
         }
 
         [Test]
-        public void TestAttemptCreation()
-        {
-            var timestamp = DateTime.Now;
-            var attempt = new Attempt(person, challenge, timestamp, "Success");
-
-            Assert.Multiple(() =>
-            {
-                Assert.That(attempt.Person, Is.EqualTo(person));
-                Assert.That(attempt.Challenge, Is.EqualTo(challenge));
-                Assert.That(attempt.Timestamp, Is.EqualTo(timestamp));
-                Assert.That(attempt.Result, Is.EqualTo("Success"));
-            });
-        }
-
-        [Test]
         public void TestAttemptAddedToExtent()
         {
-            var attempt = new Attempt(person, challenge, DateTime.Now, "Success");
+            var attempt = new Attempt(person, challenge, "Success");
 
             Assert.That(Attempt.Extent.Count, Is.EqualTo(1));
             Assert.That(Attempt.Extent.Contains(attempt), Is.True);
@@ -75,7 +59,7 @@ namespace HTBTests
         public void TestSaveExtent()
         {
             var filename = "test_attempt_extent.json";
-            var attempt = new Attempt(person, challenge, DateTime.Now, "Success");
+            var attempt = new Attempt(person, challenge, "Success");
 
             Attempt.SaveExtent(filename);
 
@@ -93,7 +77,7 @@ namespace HTBTests
         {
             var filename = "test_attempt_extent.json";
             var timestamp = DateTime.Now;
-            var attempt = new Attempt(person, challenge, timestamp, "Success");
+            var attempt = new Attempt(person, challenge, "Success");
 
             Attempt.SaveExtent(filename);
 

@@ -8,23 +8,19 @@
     "net8.0": []
   },
   "packageFolders": {
-    "C:\\Users\\Илья\\.nuget\\packages\\": {},
-    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
+    "/Users/sviatoslavpylyp/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Илья\\RiderProjects\\HTB\\HTB\\HTB.csproj",
+      "projectUniqueName": "/Users/sviatoslavpylyp/RiderProjects/HTB/HTB/HTB.csproj",
       "projectName": "HTB",
-      "projectPath": "C:\\Users\\Илья\\RiderProjects\\HTB\\HTB\\HTB.csproj",
-      "packagesPath": "C:\\Users\\Илья\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Илья\\RiderProjects\\HTB\\HTB\\obj\\",
+      "projectPath": "/Users/sviatoslavpylyp/RiderProjects/HTB/HTB/HTB.csproj",
+      "packagesPath": "/Users/sviatoslavpylyp/.nuget/packages/",
+      "outputPath": "/Users/sviatoslavpylyp/RiderProjects/HTB/HTB/obj/",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
-      ],
       "configFilePaths": [
-        "C:\\Users\\Илья\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "/Users/sviatoslavpylyp/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
@@ -42,6 +38,11 @@
         "warnAsError": [
           "NU1605"
         ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
       }
     },
     "frameworks": {
@@ -63,7 +64,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.307/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/Users/sviatoslavpylyp/.dotnet/sdk/8.0.404/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

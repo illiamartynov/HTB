@@ -92,7 +92,7 @@ public class Person
     [Required(ErrorMessage = "Profile is required.")]
     public Profile Profile { get; private set; } // Ссылка на Profile
     
-    private List<Attempt> _attempts = new List<Attempt>(); // Связь с Attempt
+    private List<Attempt> _attempts = new List<Attempt>(); 
 
     public IReadOnlyList<Attempt> Attempts => _attempts.AsReadOnly();
 
@@ -156,27 +156,71 @@ public class Person
 
         _extent.Add(this);
     }
-
-
-
-    // Метод для добавления попытки
-    public void AddAttempt(Attempt attempt)
+    
+    // Attempt funcs
+    public Attempt AddAttempt(string result, Challenge challenge)
     {
-        if (attempt == null) throw new ArgumentNullException(nameof(attempt));
-        if (!_attempts.Contains(attempt))
-        {
-            _attempts.Add(attempt);
-        }
-    }
-
-    // Метод для удаления попытки
-    public void RemoveAttempt(Attempt attempt)
-    {
-        if (attempt == null) throw new ArgumentNullException(nameof(attempt));
-        _attempts.Remove(attempt);
+        if (result == null) 
+            throw new ArgumentNullException(nameof(result));
+        if (result.Length == 0) 
+            throw new ArgumentException("The result is empty.", nameof(result));
+        if (challenge == null) 
+            throw new ArgumentNullException(nameof(challenge));
+        
+        Attempt attempt = new Attempt(this, challenge, result);
+        challenge.AddAttemptReverse(attempt);
+        
+        _attempts.Add(attempt);
+        
+        return attempt;
     }
     
+    public void RemoveAttempt(Attempt attempt)
+    {
+        if (attempt == null) 
+            throw new ArgumentNullException(nameof(attempt));
+        if (!_attempts.Contains(attempt))
+            throw new ArgumentException("The attempt doesn't exist in Person class", nameof(attempt));
 
+        // remove attempt from Challenge
+        Challenge attemptChallenge = attempt.Challenge;
+        attemptChallenge.RemoveAttemptReverse(attempt);
+        
+        // remove attemp from Person
+        _attempts.Remove(attempt);
+        
+        // remove Attempt
+        attempt.RemoveAttempt();
+    }
+
+    public void UpdateAttempt(Attempt oldAttempt, string result, Challenge challenge)
+    {
+        if (oldAttempt == null)
+            throw new ArgumentNullException(nameof(oldAttempt));
+        if (!_attempts.Contains(oldAttempt))
+            throw new ArgumentException("The attempt doesn't exist in Person class", nameof(oldAttempt));
+        
+        // remove oldAttempt from Person
+        _attempts.Remove(oldAttempt);
+        // remove oldAttempt from Challenge
+        oldAttempt.Challenge.RemoveAttemptReverse(oldAttempt);
+        // remove associations from Attempt
+        oldAttempt.DisassociateAttempt();
+        
+        // add new attempt
+        AddAttempt(result, challenge);
+    }
+    
+    // reverse funcs for Attempt
+    public void AddAttemptReverse(Attempt attempt)
+    {
+        _attempts.Add(attempt);
+    }
+
+    public void RemoveAttemptReverse(Attempt attempt)
+    {
+        _attempts.Remove(attempt);
+    }
     
     
     public Payment AssignPayment(int paymentID, float amount, DateTime paymentDate, string paymentMethod, string currency = "USD")
@@ -226,6 +270,7 @@ public class Person
         payment.UnassignOwner();
     }
     
+    // funcs for certificate
     public void AddCertificate(Certificate certificate)
     {
         if (certificate == null)
@@ -234,12 +279,56 @@ public class Person
         if (!_certificates.Contains(certificate))
         {
             _certificates.Add(certificate);
-            certificate.AssignOwner(this);
+            certificate.AddOwnerReverse(this);
         }
     }
     
+    public void RemoveCertificate(Certificate certificate)
+    {
+        if (certificate == null) 
+            throw new ArgumentNullException(nameof(certificate));
+            
+        if (_certificates.Contains(certificate))
+        {
+            _certificates.Remove(certificate);
+            certificate.RemoveOwnerReverse();
+        }
+    }
 
-// Метод добавления платежа
+    public void UpdateCertificate(Certificate oldCert, Certificate newCert)
+    {
+        if (newCert == null) 
+            throw new ArgumentNullException(nameof(newCert), "Null values are not allowed");
+        if (oldCert == null)
+            throw new ArgumentNullException(nameof(oldCert), "Null values are not allowed");
+
+        if (_certificates.Contains(newCert))
+            throw new InvalidOperationException("The newCert already exists in the list.");
+        if (!_certificates.Contains(oldCert))
+            throw new InvalidOperationException("The oldCert doesn't exists in the list.");
+        
+        // disassociate oldCert
+        _certificates.Remove(oldCert);
+        oldCert.RemoveOwnerReverse();
+        
+        // associate newCert
+        AddCertificate(newCert);
+    }
+    
+    // reverse funcs for certificate
+    public void AddCertificateReverse(Certificate certificate)
+    {
+        if (!_certificates.Contains(certificate))
+            _certificates.Add(certificate);        
+    }
+
+    public void RemoveCertificateReverse(Certificate certificate)
+    {
+        _certificates.Remove(certificate);
+    }
+    
+
+    // Метод добавления платежа
     public void AddPayment(Payment payment)
     {
         if (payment == null)
@@ -252,48 +341,12 @@ public class Person
         }
     }
 
-// Метод удаления платежа
+    // Метод удаления платежа
     public void RemovePayment(Payment payment)
     {
         if (_payments.Remove(payment))
         {
             payment.UnassignOwner();
-        }
-    }
-    public Certificate AssignCertificate(int certificateId, DateTime issueDate)
-    {
-        var certificate = Certificate.Create(certificateId, issueDate, this);
-        _certificates.Add(certificate);
-        return certificate;
-    }
-
-    public void UnassignCertificate(Certificate certificate)
-    {
-        if (certificate == null)
-            throw new ArgumentNullException(nameof(certificate));
-
-        if (_certificates.Remove(certificate))
-        {
-            certificate.UnassignOwner();
-        }
-    }
-
-    
-    // Создаем и добавляем сертификат через фабрику Certificate
-    public Certificate CreateCertificate(int certificateId, DateTime issueDate)
-    {
-        var certificate = Certificate.Create(certificateId, issueDate, this);
-        _certificates.Add(certificate);
-        return certificate;
-    }
-
-    // Удаляем сертификат
-    public void RemoveCertificate(Certificate certificate)
-    {
-        if (_certificates.Contains(certificate))
-        {
-            _certificates.Remove(certificate);
-            certificate.UnassignOwner();
         }
     }
 
@@ -449,6 +502,11 @@ public class Person
 
         // Удаляем профиль вместе с `Person`
         person.Profile = null;
+        foreach (var certificate in person._certificates)
+        {
+            person.RemoveCertificate(certificate);
+        }
+            
         _extent.Remove(person);
     }
 
