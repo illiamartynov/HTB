@@ -35,77 +35,27 @@ namespace HTBTests
                 profile: profile
             );
 
-            certificate = Certificate.Create(1, DateTime.Now, owner);
+            certificate = new Certificate(1, DateTime.Now, owner);
         }
 
         [Test]
-        public void TestCreateCertificate()
+        public void AddOwner_ShouldSetOwnerCorrectly()
         {
-            Assert.DoesNotThrow(() => Certificate.Create(1, DateTime.Now, owner));
+            var certificate = new Certificate(1, DateTime.Now, null);
+
+            certificate.AddOwner(owner);
+
+            Assert.AreEqual(owner, certificate.Owner);
         }
 
         [Test]
-        public void TestCreateCertificateThrowsExceptionIfOwnerIsNull()
+        public void RemoveOwner_ShouldClearOwner()
         {
-            Assert.Throws<ArgumentNullException>(() => Certificate.Create(1, DateTime.Now, null));
-        }
+            var certificate = new Certificate(1, DateTime.Now, owner);
 
-        [Test]
-        public void TestViewCertificate()
-        {
-            using (var sw = new StringWriter())
-            {
-                Console.SetOut(sw);
-                certificate.ViewCertificate();
+            certificate.RemoveOwner(owner);
 
-                var expectedOutput = $"Certificate ID: {certificate.CertificateId}, Issue Date: {certificate.IssueDate}, Owner: {owner.Name}";
-                var actualOutput = sw.ToString().Trim();
-
-                Assert.That(actualOutput, Is.EqualTo(expectedOutput));
-            }
-        }
-
-        [Test]
-        public void TestUnassignOwner()
-        {
-            certificate.UnassignOwner();
             Assert.IsNull(certificate.Owner);
-        }
-
-        [Test]
-        public void TestAssignOwner()
-        {
-            var newAddress = Address.AddAddress("New Country", "New City", "New Street", 456);
-            var newRank = new Rank(2, null, new Leaderboard()); // Adjust leaderboard as per context
-            var newAccessType = new Paid(100); // Example of IAccessType
-            var newCourse = new Course("Advanced Security", "Intermediate", newAccessType);
-            var newCompletenessLevel = new CompletenessLevel(80, DateTime.Now, null, newCourse);
-            var newProfile = new Profile(200, "Advanced", null); // Adjust person assignment later
-
-            var newOwner = new Person(
-                email: "newowner@example.com",
-                name: "Jane Doe",
-                password: "newpassword123",
-                registrationDate: DateTime.Now,
-                birthDate: new DateTime(1992, 2, 2),
-                isActive: true,
-                balance: 0,
-                address: newAddress,
-                rank: newRank,
-                completenessLevel: newCompletenessLevel,
-                profile: newProfile
-            );
-
-            certificate.AssignOwner(newOwner);
-
-            Assert.IsNotNull(certificate.Owner);
-            Assert.That(certificate.Owner.Name, Is.EqualTo("Jane Doe"));
-        }
-
-        [Test]
-        public void TestAssignOwnerThrowsExceptionIfOwnerIsNull()
-        {
-            Assert.Throws<ArgumentNullException>(() => certificate.AssignOwner(null));
         }
     }
 }

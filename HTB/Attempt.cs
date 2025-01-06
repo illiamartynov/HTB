@@ -14,29 +14,21 @@ public class Attempt
     private string _result;
 
     private static List<Attempt> _extent = new List<Attempt>();
+    public static IReadOnlyList<Attempt> Extent => _extent.AsReadOnly();
+
 
     [Required(ErrorMessage = "Person is required.")]
     public Person Person
     {
         get => _person;
-        private set
-        {
-            _person?.RemoveAttempt(this); // Убираем старую связь
-            _person = value;
-            _person?.AddAttempt(this);   // Устанавливаем новую связь
-        }
+        private set {}
     }
 
     [Required(ErrorMessage = "Challenge is required.")]
     public Challenge Challenge
     {
         get => _challenge;
-        private set
-        {
-            _challenge?.RemoveAttempt(this); // Убираем старую связь
-            _challenge = value;
-            _challenge?.AddAttempt(this);   // Устанавливаем новую связь
-        }
+        private set {}
     }
 
     [Required(ErrorMessage = "Timestamp is required.")]
@@ -53,38 +45,30 @@ public class Attempt
         get => _result;
         private set => _result = value;
     }
-
-    public static IReadOnlyList<Attempt> Extent => _extent.AsReadOnly();
-
-    public Attempt(Person person, Challenge challenge, DateTime timestamp, string result)
+    
+    public Attempt(Person person, Challenge challenge, string result)
     {
         Person = person ?? throw new ArgumentNullException(nameof(person));
         Challenge = challenge ?? throw new ArgumentNullException(nameof(challenge));
-        Timestamp = timestamp;
+        Timestamp = DateTime.Now;
         Result = result ?? throw new ArgumentNullException(nameof(result));
-
-        Person.AddAttempt(this);
-        Challenge.AddAttempt(this);
 
         _extent.Add(this);
     }
 
-    public void UpdateAttempt(DateTime? timestamp = null, string? result = null)
+    public void RemoveAttempt()
     {
-        if (timestamp != null) _timestamp = timestamp.Value;
-        if (result != null) _result = result;
+        _extent.Remove(this);
     }
 
-    public static void DeleteAttempt(Attempt attempt)
+    public void DisassociateAttempt()
     {
-        if (attempt == null)
-            throw new ArgumentNullException(nameof(attempt));
-
-        attempt.Person.RemoveAttempt(attempt);
-        attempt.Challenge.RemoveAttempt(attempt);
-        _extent.Remove(attempt);
+        _person = null;
+        _challenge = null;
     }
 
+    
+    // extent funcs
     public static void SaveExtent(string filename = "attempt_extent.json")
     {
         try

@@ -1,10 +1,16 @@
-﻿namespace HTB;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+
+namespace HTB;
 
 using System;
 using System.ComponentModel.DataAnnotations;
 
 public class Certificate
 {
+    private static List<Certificate> _extent = new List<Certificate>();
+    public static IReadOnlyList<Certificate> Extent => _extent.AsReadOnly();
+    
     private int _certificateId;
     private DateTime _issueDate;
 
@@ -24,38 +30,125 @@ public class Certificate
         private set => _issueDate = value;
     }
 
-    [Required]
     public Person Owner { get; private set; }
-
-    // Приватный конструктор, чтобы ограничить прямое создание объектов
-    private Certificate(int certificateId, DateTime issueDate, Person owner)
+    
+    public Certificate(int certificateId, DateTime issueDate, Person owner)
     {
         CertificateId = certificateId;
         IssueDate = issueDate;
-        Owner = owner ?? throw new ArgumentNullException(nameof(owner), "Owner cannot be null.");
+        if (owner != null)
+            AddOwner(owner);
+        
+        _extent.Add(this);
     }
 
-    // Фабричный метод для создания сертификата
-    public static Certificate Create(int certificateId, DateTime issueDate, Person owner)
+    public static void RemoveCertificate(Certificate certificate)
     {
-        return new Certificate(certificateId, issueDate, owner);
+        certificate.RemoveOwner(certificate.Owner);
+        _extent.Remove(certificate);
+    }
+    
+    // person funcs
+    public void AddOwner(Person person)
+    {
+        if (person == null)
+            throw new ArgumentNullException(nameof(person));
+
+        if (!person.Equals(Owner))
+        {
+            person.AddCertificateReverse(this);
+            Owner = person;
+        }
     }
 
-    // Удаление ссылки на владельца
-    public void UnassignOwner()
+    public void RemoveOwner(Person person)
     {
+        if (person != null)
+            throw new ArgumentNullException(nameof(person));
+
+        person.RemoveCertificateReverse(this);
         Owner = null;
     }
 
-    public void ViewCertificate()
+    public void UpdateOwner(Person oldPerson, Person newPerson)
     {
-        Console.WriteLine($"Certificate ID: {CertificateId}, Issue Date: {IssueDate}, Owner: {Owner.Name}");
+        if (newPerson == null) 
+            throw new ArgumentNullException(nameof(newPerson));
+        if (oldPerson == null)
+            throw new ArgumentNullException(nameof(oldPerson));
+        
+        if (Owner != oldPerson)
+            throw new InvalidOperationException("PersonToRemove isn't current Owner of certificate");
+        
+        // disassociate oldPerson
+        Owner = null;
+        oldPerson.RemoveCertificateReverse(this);
+        
+        // associate newPerson
+        AddOwner(newPerson);
     }
-    // Certificate
-    public void AssignOwner(Person owner)
+    
+    // reverse person funcs
+    public void AddOwnerReverse(Person owner)
     {
         Owner = owner ?? throw new ArgumentNullException(nameof(owner));
     }
 
-   
+    public void RemoveOwnerReverse()
+    {
+        Owner = null;
+    }
+    
+
+    // other funcs
+    public void ViewCertificate()
+    {
+        Console.WriteLine($"Certificate ID: {CertificateId}, Issue Date: {IssueDate}, Owner: {Owner.Name}");
+    }
+    
+    // extent funcs
+    public static void LoadExtent(string filename = "certificate_extent.json")
+    {
+        if (File.Exists(filename))
+        {
+            var options = new JsonSerializerOptions
+            {
+                ReferenceHandler = ReferenceHandler.Preserve
+            };
+
+            try
+            {
+                var json = File.ReadAllText(filename);
+                _extent = JsonSerializer.Deserialize<List<Certificate>>(json, options) ?? new List<Certificate>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred while loading the extent: {ex.Message}");
+            }
+        }
+        else
+        {
+            Console.WriteLine($"File '{filename}' not found. Initializing an empty extent.");
+            _extent = new List<Certificate>();
+        }
+    }
+    
+    public static void SaveExtent(string filename = "certificate_extent.json")
+    {
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            ReferenceHandler = ReferenceHandler.Preserve
+        };
+
+        try
+        {
+            var json = JsonSerializer.Serialize(_extent, options);
+            File.WriteAllText(filename, json);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An error occurred while saving the extent: {ex.Message}");
+        }
+    }
 }
