@@ -79,27 +79,65 @@ namespace HTB
             Console.WriteLine($"Access Details: {AccessType.GetAccessDescription()}");
             Console.WriteLine($"Duration: {_startDate} - {_endDate}");
         }
+        
+        // funcs for person connection
         public void AddPerson(Person person)
         {
             if (person == null)
-                throw new ArgumentNullException(nameof(person), "Person cannot be null.");
+                throw new ArgumentNullException(nameof(person));
+            if (Persons.Contains(person)) 
+                throw new ArgumentException("The person already exists in the Subscription class", nameof(person));
 
-            if (!_persons.Contains(person))
-            {
-                _persons.Add(person);
-                person.AddSubscription(this); // Двусторонняя связь
-            }
+            _persons.Add(person);
+            person.AddSubscriptionReverse(this);
         }
 
         public void RemovePerson(Person person)
         {
             if (person == null)
-                throw new ArgumentNullException(nameof(person), "Person cannot be null.");
+                throw new ArgumentNullException(nameof(person));
+            if (!Persons.Contains(person))
+                return;
+        
+            // remove Person from Subscription
+            _persons.Remove(person);
 
+            // remove Subscription from person
+            person.RemoveSubscriptionReverse(this);
+        }
+
+        public void UpdatePerson(Person oldPerson, Person newPerson)
+        {
+            if (oldPerson == null)
+                throw new ArgumentNullException(nameof(oldPerson));
+            if (newPerson == null)
+                throw new ArgumentNullException(nameof(newPerson));
+            if (!Persons.Contains(oldPerson))
+                throw new ArgumentException("The oldPerson doesn't exist in Subscription class", nameof(oldPerson));
+            if (Persons.Contains(newPerson))   
+                throw new ArgumentException("The person already exists in the Subscription class", nameof(newPerson));
+        
+            _persons.Remove(oldPerson);
+            oldPerson.RemoveSubscriptionReverse(this);
+
+            // add new person
+            _persons.Add(newPerson);
+            newPerson.AddSubscriptionReverse(this);
+        }
+    
+        // Person reverse funcs
+        public void AddSubscriptionReverse(Person person)
+        {
+            _persons.Add(person);
+        }
+
+        public void RemoveSubscriptionReverse(Person person)
+        {
             _persons.Remove(person);
         }
 
 
+        // extent funcs
         public static void SaveExtent(string filename = "subscription_extent.json")
         {
             var options = new JsonSerializerOptions { WriteIndented = true };

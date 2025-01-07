@@ -36,36 +36,68 @@ public class Resource
         set => _url = value;
     }
 
-    public Lesson Lesson { get; private set; }
+    public List<Lesson> Lessons { get; private set; }
 
     public Resource(string resourceName, string resourceType, string url, Lesson lesson)
     {
         _resourceName = resourceName;
         _resourceType = resourceType;
         _url = url;
+    }
+    
+    // funcs for lesson connection
+    public void AddLesson(Lesson lesson)
+    {
+        if (lesson == null)
+            throw new ArgumentNullException(nameof(lesson));
+        if (Lessons.Contains(lesson)) 
+            throw new ArgumentException("The lesson already exists in the Resource class", nameof(lesson));
 
-        AssignLesson(lesson);
-        Resources.Add(this);
+        Lessons.Add(lesson);
+        lesson.AddResourceReverse(this);
     }
 
-    public void AssignLesson(Lesson lesson)
+    public void RemoveLesson(Lesson lesson)
     {
-        Lesson = lesson;
-        lesson.AddResource(this);
+        if (lesson == null)
+            throw new ArgumentNullException(nameof(lesson));
+        if (!Lessons.Contains(lesson))
+            return;
+        
+        // remove Resource from Lesson
+        Lessons.Remove(lesson);
+
+        // remove Resource from lesson
+        lesson.RemoveResourceReverse(this);
     }
 
-    public void UnassignLesson()
+    public void UpdateLesson(Lesson oldLesson, Lesson newLesson)
     {
-        if (Lesson != null)
-        {
-            Lesson.RemoveResource(this);
-            Lesson = null;
-        }
+        if (oldLesson == null)
+            throw new ArgumentNullException(nameof(oldLesson));
+        if (newLesson == null)
+            throw new ArgumentNullException(nameof(newLesson));
+        if (!Lessons.Contains(oldLesson))
+            throw new ArgumentException("The oldLesson doesn't exist in Resource class", nameof(oldLesson));
+        if (Lessons.Contains(newLesson))   
+            throw new ArgumentException("The lesson already exists in the Resource class", nameof(newLesson));
+        
+        Lessons.Remove(oldLesson);
+        oldLesson.RemoveResourceReverse(this);
+
+        // add new lesson
+        Lessons.Add(newLesson);
+        newLesson.AddResourceReverse(this);
+    }
+    
+    // Lesson reverse funcs
+    public void AddLessonReverse(Lesson lesson)
+    {
+        Lessons.Add(lesson);
     }
 
-    public static void DeleteResource(Resource resource)
+    public void RemoveLessonReverse(Lesson lesson)
     {
-        Resources.Remove(resource);
-        resource.UnassignLesson();
+        Lessons.Remove(lesson);
     }
 }

@@ -35,17 +35,17 @@ class Program
         var course1 = new Course("C# Basics", "Beginner", new Free(30));
         var course2 = new Course("Advanced C#", "Advanced", new Paid(150));
 
-        // Создаем уровни завершенности
-        var completenessLevel1 = new CompletenessLevel(80, DateTime.Now.AddMonths(-1), person1, course1);
-        var completenessLevel2 = new CompletenessLevel(50, DateTime.Now.AddMonths(-2), person2, course2);
+        // // Создаем уровни завершенности
+        // var completenessLevel1 = new CompletenessLevel(80, DateTime.Now.AddMonths(-1), person1, course1);
+        // var completenessLevel2 = new CompletenessLevel(50, DateTime.Now.AddMonths(-2), person2, course2);
 
-        // Добавляем ранги и завершенность пользователям
-        person1.UpdateRank(rank1);
-        person2.UpdateRank(rank2);
-
-        Console.WriteLine("\nCompleteness Levels:");
-        Console.WriteLine($"Person: {person1.Name}, Course: {course1.CourseName}, Completeness: {completenessLevel1.CompletenessPercentage}%");
-        Console.WriteLine($"Person: {person2.Name}, Course: {course2.CourseName}, Completeness: {completenessLevel2.CompletenessPercentage}%");
+        // // Добавляем ранги и завершенность пользователям
+        // person1.UpdateRank(rank1);
+        // person2.UpdateRank(rank2);
+        //
+        // Console.WriteLine("\nCompleteness Levels:");
+        // Console.WriteLine($"Person: {person1.Name}, Course: {course1.CourseName}, Completeness: {completenessLevel1.CompletenessPercentage}%");
+        // Console.WriteLine($"Person: {person2.Name}, Course: {course2.CourseName}, Completeness: {completenessLevel2.CompletenessPercentage}%");
 
     
     }

@@ -34,9 +34,9 @@ namespace HTB
             set => _content = value;
         }
 
-        public Course Course { get; private set; } // Связь с `Course`
+        public List<Course> Courses { get; private set; } 
 
-        public List<Resource> Resources { get; } = new List<Resource>();
+        public List<Resource> Resources { get; private set; } 
 
         public Lesson(string lessonTitle, string content)
         {
@@ -44,62 +44,123 @@ namespace HTB
             _content = content;
             _extent.Add(this);
         }
-
-        public void AssignToCourse(Course course)
+        
+        // Course funcs
+        public void AddCourse(Course course)
         {
-            if (course == null) throw new ArgumentNullException(nameof(course));
+            if (course == null)
+                throw new ArgumentNullException(nameof(course));
+            if (Courses.Contains(course)) 
+                throw new ArgumentException("The course already exists in the Lesson class", nameof(course));
 
-            // Проверяем, если урок уже привязан к другому курсу
-            if (Course != null)
-            {
-                throw new InvalidOperationException($"Lesson '{LessonTitle}' is already assigned to a course.");
-            }
-
-            Course = course;
-            course.AddLesson(this);
+            Courses.Add(course);
+            course.AddLessonReverse(this);
         }
 
-        public void UnassignFromCourse()
+        public void RemoveCourse(Course course)
         {
-            if (Course == null)
-            {
-                throw new InvalidOperationException($"Lesson '{LessonTitle}' is not assigned to any course.");
-            }
+            if (course == null)
+                throw new ArgumentNullException(nameof(course));
+            if (!Courses.Contains(course))
+                return;
+            
+            // remove Course from Lesson
+            Courses.Remove(course);
 
-            var course = Course;
-            Course = null;
-            course.RemoveLesson(this);
+            // remove lesson from course
+            course.RemoveLessonReverse(this);
         }
 
+        public void UpdateCourse(Course oldCourse, Course newCourse)
+        {
+            if (oldCourse == null)
+                throw new ArgumentNullException(nameof(oldCourse));
+            if (newCourse == null)
+                throw new ArgumentNullException(nameof(newCourse));
+            if (!Courses.Contains(oldCourse))
+                throw new ArgumentException("The oldLesson doesn't exist in Course class", nameof(oldCourse));
+            if (Courses.Contains(newCourse))   
+                throw new ArgumentException("The lesson already exists in the Course class", nameof(newCourse));
+            
+            Courses.Remove(oldCourse);
+            oldCourse.RemoveLessonReverse(this);
+
+            // add new course
+            Courses.Add(newCourse);
+            newCourse.AddLessonReverse(this);
+        }
+        
+        
+        // Course reverse funcs
+        public void AddCourseReverse(Course course)
+        {
+            Courses.Add(course);
+        }
+
+        public void RemoveCourseReverse(Course course)
+        {
+            Courses.Remove(course);
+        }
+        
+        // resource funcs
         public void AddResource(Resource resource)
         {
-            if (!Resources.Contains(resource))
-            {
-                Resources.Add(resource);
-            }
+            if (resource == null)
+                throw new ArgumentNullException(nameof(resource));
+            if (Resources.Contains(resource)) 
+                throw new ArgumentException("The resource already exists in the Lesson class", nameof(resource));
+
+            Resources.Add(resource);
+            resource.AddLessonReverse(this);
         }
 
         public void RemoveResource(Resource resource)
         {
+            if (resource == null)
+                throw new ArgumentNullException(nameof(resource));
+            if (!Resources.Contains(resource))
+                return;
+            
+            // remove Resource from Lesson
+            Resources.Remove(resource);
+
+            // remove lesson from resource
+            resource.RemoveLessonReverse(this);
+        }
+
+        public void UpdateResource(Resource oldResource, Resource newResource)
+        {
+            if (oldResource == null)
+                throw new ArgumentNullException(nameof(oldResource));
+            if (newResource == null)
+                throw new ArgumentNullException(nameof(newResource));
+            if (!Resources.Contains(oldResource))
+                throw new ArgumentException("The oldLesson doesn't exist in Resource class", nameof(oldResource));
+            if (Resources.Contains(newResource))   
+                throw new ArgumentException("The lesson already exists in the Resource class", nameof(newResource));
+            
+            Resources.Remove(oldResource);
+            oldResource.RemoveLessonReverse(this);
+
+            // add new resource
+            Resources.Add(newResource);
+            newResource.AddLessonReverse(this);
+        }
+        
+        
+        // resource reverse funcs
+        public void AddResourceReverse(Resource resource)
+        {
+            Resources.Add(resource);
+        }
+
+        public void RemoveResourceReverse(Resource resource)
+        {
             Resources.Remove(resource);
         }
+        
 
-        public static void DeleteLesson(Lesson lesson)
-        {
-            if (lesson == null) throw new ArgumentNullException(nameof(lesson));
-
-            _extent.Remove(lesson);
-
-            // Убираем связь с курсом
-            lesson.UnassignFromCourse();
-
-            // Удаляем все ресурсы
-            foreach (var resource in new List<Resource>(lesson.Resources))
-            {
-                Resource.DeleteResource(resource);
-            }
-        }
-
+        // extent funcs
         public static void SaveExtent(string filename = "lesson_extent.json")
         {
             var json = JsonSerializer.Serialize(_extent);

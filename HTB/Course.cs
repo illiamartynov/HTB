@@ -116,7 +116,7 @@ namespace HTB
             _extent.Remove(course);
         }
 
-        // funcs for reverse connection
+        // funcs for person reverse connection
         public void AddCompletenessLevelReverse(CompletenessLevel completenessLevel)
         {
             _completenessLevels.Add(completenessLevel);
@@ -125,6 +125,64 @@ namespace HTB
         public void RemoveCompletenessLevelReverse(CompletenessLevel completenessLevel)
         {
             _completenessLevels.Remove(completenessLevel);
+        }
+        
+        // funcs for lesson connection
+        public void AddLesson(Lesson lesson)
+        {
+            if (lesson == null)
+                throw new ArgumentNullException(nameof(lesson));
+            if (_lessons.Contains(lesson)) 
+                throw new ArgumentException("The lesson already exists in the Course class", nameof(lesson));
+
+            _lessons.Add(lesson);
+            lesson.AddCourseReverse(this);
+        }
+
+        public void RemoveLesson(Lesson lesson)
+        {
+            if (lesson == null)
+                throw new ArgumentNullException(nameof(lesson));
+            if (!_lessons.Contains(lesson))
+                return;
+            
+            // remove Lesson from Course
+            _lessons.Remove(lesson);
+
+            // remove course from Lesson
+            lesson.RemoveCourseReverse(this);
+        }
+
+        public void UpdateLesson(Lesson oldLesson, Lesson newLesson)
+        {
+            if (oldLesson == null)
+                throw new ArgumentNullException(nameof(oldLesson));
+            if (newLesson == null)
+                throw new ArgumentNullException(nameof(newLesson));
+            if (!_lessons.Contains(oldLesson))
+                throw new ArgumentException("The oldLesson doesn't exist in Course class", nameof(oldLesson));
+            if (_lessons.Contains(newLesson))   
+                throw new ArgumentException("The lesson already exists in the Course class", nameof(newLesson));
+            
+            // remove oldCompletenessLevel from Course
+            _lessons.Remove(oldLesson);
+            // remove oldCompletenessLevel from Person
+            oldLesson.RemoveCourseReverse(this);
+
+            // add new CompletenessLevel
+            _lessons.Add(newLesson);
+            newLesson.AddCourseReverse(this);
+        }
+        
+        // Lesson reverse funcs
+        public void AddLessonReverse(Lesson lesson)
+        {
+            _lessons.Add(lesson);
+        }
+
+        public void RemoveLessonReverse(Lesson lesson)
+        {
+            _lessons.Remove(lesson);
         }
 
         // Динамическая регистрация курса
@@ -233,3 +291,4 @@ namespace HTB
         }
     }
 }
+

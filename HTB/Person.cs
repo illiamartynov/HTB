@@ -150,8 +150,6 @@ public class Person
         _extent.Add(this);
     }
     
-    // ====================
-    
     // CompletenessLevel funcs
     public CompletenessLevel AddCompletenessLevel(int percentage, Course course)
     {
@@ -344,6 +342,64 @@ public class Person
     {
         _ranks.Remove(rank);
     }
+    
+    
+    // funcs for subscription connection
+    public void AddSubscription(Subscription subscription)
+    {
+        if (subscription == null)
+            throw new ArgumentNullException(nameof(subscription));
+        if (Subscriptions.Contains(subscription)) 
+            throw new ArgumentException("The subscription already exists in the Person class", nameof(subscription));
+
+        _subscriptions.Add(subscription);
+        subscription.AddSubscriptionReverse(this);
+    }
+
+    public void RemoveSubscription(Subscription subscription)
+    {
+        if (subscription == null)
+            throw new ArgumentNullException(nameof(subscription));
+        if (!Subscriptions.Contains(subscription))
+            return;
+        
+        // remove Subscription from person
+        _subscriptions.Remove(subscription);
+
+        // remove person from subscription
+        subscription.RemoveSubscriptionReverse(this);
+    }
+
+    public void UpdateSubscription(Subscription oldSubscription, Subscription newSubscription)
+    {
+        if (oldSubscription == null)
+            throw new ArgumentNullException(nameof(oldSubscription));
+        if (newSubscription == null)
+            throw new ArgumentNullException(nameof(newSubscription));
+        if (!Subscriptions.Contains(oldSubscription))
+            throw new ArgumentException("The oldSubscription doesn't exist in Person class", nameof(oldSubscription));
+        if (Subscriptions.Contains(newSubscription))   
+            throw new ArgumentException("The subscription already exists in the Person class", nameof(newSubscription));
+        
+        _subscriptions.Remove(oldSubscription);
+        oldSubscription.RemoveSubscriptionReverse(this);
+
+        // add new subscription
+        _subscriptions.Add(newSubscription);
+        newSubscription.AddSubscriptionReverse(this);
+    }
+    
+    // Subscription reverse funcs
+    public void AddSubscriptionReverse(Subscription subscription)
+    {
+        _subscriptions.Add(subscription);
+    }
+
+    public void RemoveSubscriptionReverse(Subscription subscription)
+    {
+        _subscriptions.Remove(subscription);
+    }
+
     
     
     public Payment AssignPayment(int paymentID, float amount, DateTime paymentDate, string paymentMethod, string currency = "USD")
@@ -574,7 +630,6 @@ public class Person
         Profile profile,
         Address address,
         CompletenessLevel completenessLevel,
-        Subscription subscription,
         List<Certificate>? certificates = null, // Дополнительные сертификаты
         List<Payment>? payments = null          // Дополнительные платежи
     )
@@ -721,30 +776,6 @@ public class Person
             oldProfile.UnassignPerson();
         }
     }
-    
-    public void AddSubscription(Subscription subscription)
-    {
-        if (subscription == null)
-            throw new ArgumentNullException(nameof(subscription), "Subscription cannot be null.");
-
-        if (!_subscriptions.Contains(subscription))
-        {
-            _subscriptions.Add(subscription);
-            subscription.AddPerson(this); // Двусторонняя связь
-        }
-    }
-    
-    public void RemoveSubscription(Subscription subscription)
-    {
-        if (subscription == null)
-            throw new ArgumentNullException(nameof(subscription), "Subscription cannot be null.");
-
-        if (_subscriptions.Remove(subscription))
-        {
-            subscription.RemovePerson(this); // Удаляем связь из Subscription
-        }
-    }
-
 
     
     public static void SaveExtent(string filename = "person_extent.json")
