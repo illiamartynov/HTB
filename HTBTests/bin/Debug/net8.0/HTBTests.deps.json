@@ -319,7 +319,10 @@
       "System.Reflection.Metadata/1.6.0": {},
       "HTB/1.0.0": {
         "runtime": {
-          "HTB.dll": {}
+          "HTB.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       }
     }

@@ -6,57 +6,105 @@
 
     public class Leaderboard
     {
+        private static List<Leaderboard> _extent = new();
+        public static IReadOnlyList<Leaderboard> Extent => _extent.AsReadOnly();
+        
         private readonly List<Rank> _ranks = new();
         public IReadOnlyList<Rank> Ranks => _ranks.AsReadOnly();
-        private List<(int Rank, int TotalPoints)> _rankedPeople = new List<(int, int)>();
-
-        public IReadOnlyList<(int Rank, int TotalPoints)> RankedPeople => _rankedPeople.AsReadOnly();
-
-        public void AddToLeaderboard(
-            [Range(1, int.MaxValue, ErrorMessage = "Rank must be a positive integer.")] int rank,
-            [Range(0, int.MaxValue, ErrorMessage = "Total points cannot be negative.")] int totalPoints)
+        
+        private string _name;
+        
+        [Required(ErrorMessage = "Name is required.")]
+        [StringLength(100, ErrorMessage = "Name cannot exceed 100 characters.")]
+        public string Name
         {
-            _rankedPeople.Add((rank, totalPoints));
+            get => _name;
+            private set => _name = value;
         }
 
-
-       
-
+        public Leaderboard(string name)
+        {
+            _name = name;
+        }
         
-
-        public void AddPerson(Person person, int rankLevel)
+        // Rank funcs
+        public Rank AddRank(int rankLevel, Person person)
         {
             if (person == null)
                 throw new ArgumentNullException(nameof(person));
 
-            if (_ranks.Any(r => r.Person == person))
-                throw new InvalidOperationException("Person is already on the leaderboard.");
+            Rank rank = new Rank(rankLevel, person, this);
+            person.AddRankReverse(rank);
 
-            var rank = new Rank(rankLevel, person, this);
+            _ranks.Add(rank);
+
+            return rank;
+        }
+
+        public void RemoveRank(Rank rank)
+        {
+            if (!_ranks.Contains(rank))
+                throw new ArgumentException("The rank doesn't exist in Leaderboard class", nameof(rank));
+
+            // remove rank from Person
+            Person rankPerson = rank.Person;
+            rankPerson.RemoveRankReverse(rank);
+
+            // remove rank from Leaderboard
+            _ranks.Remove(rank);
+
+            // remove Rank
+            rank.RemoveRank();
+        }
+
+        public void UpdateRank(Rank oldRank, int rankLevel, Person person)
+        {
+            if (oldRank == null)
+                throw new ArgumentNullException(nameof(oldRank));
+            if (!_ranks.Contains(oldRank))
+                throw new ArgumentException("The rank doesn't exist in Leaderboard class", nameof(oldRank));
+
+            // remove oldRank from Challenge
+            _ranks.Remove(oldRank);
+            // remove oldRank from Person
+            oldRank.Person.RemoveRankReverse(oldRank);
+            // remove associations from Rank
+            oldRank.DisassociateRank();
+
+            // add new rank
+            AddRank(rankLevel, person);
+        }
+
+        // Leaderboard funcs
+        public static void DeleteLeaderboard(Leaderboard leaderboard)
+        {
+            if (leaderboard == null)
+                throw new ArgumentNullException(nameof(leaderboard));
+
+            foreach (var rank in new List<Rank>(leaderboard._ranks))
+            {
+                leaderboard.RemoveRank(rank);
+            }
+
+            _extent.Remove(leaderboard);
+        }
+
+        // funcs for reverse connection
+        public void AddRankReverse(Rank rank)
+        {
             _ranks.Add(rank);
         }
-        
-        public void RemovePerson(Person person)
+
+        public void RemoveRankReverse(Rank rank)
         {
-            var rank = _ranks.FirstOrDefault(r => r.Person == person);
-            if (rank != null)
-            {
-                _ranks.Remove(rank);
-            }
-        }
-        
-        public void Clear()
-        {
-            _ranks.Clear();
+            _ranks.Remove(rank);
         }
 
+        // Leaderboard funcs
         public void DeleteLeaderboard()
         {
             _ranks.Clear();
             Console.WriteLine("Leaderboard deleted along with all associated ranks.");
         }
-
-        
-        
     }
 }

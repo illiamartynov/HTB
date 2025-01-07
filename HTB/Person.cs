@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel;
+using System.Text.Json.Serialization;
 
 namespace HTB;
 
@@ -53,9 +54,6 @@ public class Person
     [Required(ErrorMessage = "Address is required.")]
     public Address Address { get; private set; }
 
-    [Required(ErrorMessage = "Rank is required.")]
-    public Rank Rank { get; private set; }
-
     [Required(ErrorMessage = "Completeness level is required.")]
     public CompletenessLevel CompletenessLevel { get; private set; }
 
@@ -73,27 +71,26 @@ public class Person
 
     private List<Subscription> _subscriptions = new List<Subscription>();
     public IReadOnlyList<Subscription> Subscriptions => _subscriptions.AsReadOnly();
-
     
-
-
+    // Rank
+    private List<Rank> _ranks = new List<Rank>(); 
+    public IReadOnlyList<Rank> Ranks => _ranks.AsReadOnly();
 
     // Рефлексивная ассоциация
     private List<Person> _referrals = new List<Person>();
     public IReadOnlyList<Person> Referrals => _referrals.AsReadOnly();
-
     public Person ReferredBy { get; private set; }
-
-
+    
+    
     private int _totalPoints; // Очки пользователя
-
     public int TotalPoints => _totalPoints;
     
-    [Required(ErrorMessage = "Profile is required.")]
-    public Profile Profile { get; private set; } // Ссылка на Profile
     
+    [Required(ErrorMessage = "Profile is required.")]
+    public Profile Profile { get; private set; } 
+    
+    // Attempt
     private List<Attempt> _attempts = new List<Attempt>(); 
-
     public IReadOnlyList<Attempt> Attempts => _attempts.AsReadOnly();
 
     private readonly List<CompletenessLevel> _completenessLevels = new();
@@ -116,8 +113,6 @@ public class Person
         bool isActive,
         int balance,
         Address address,
-        Rank rank,
-        CompletenessLevel completenessLevel,
         Profile profile,
         List<Certificate>? certificates = null,
         List<Payment>? payments = null
@@ -133,8 +128,6 @@ public class Person
 
         AssignProfile(profile);
         AssignAddress(address);
-        Rank = rank;
-        CompletenessLevel = completenessLevel;
 
         // Добавление сертификатов
         if (certificates != null)
@@ -156,6 +149,72 @@ public class Person
 
         _extent.Add(this);
     }
+    
+    // ====================
+    
+    // CompletenessLevel funcs
+    public CompletenessLevel AddCompletenessLevel(int percentage, Course course)
+    {
+        if (percentage < 0) 
+            throw new ArgumentException("Percentage can't be negative", nameof(percentage));
+        if (course == null) 
+            throw new ArgumentNullException(nameof(course));
+        
+        CompletenessLevel completenessLevel = new CompletenessLevel(percentage, this, course);
+        course.AddCompletenessLevelReverse(completenessLevel);
+        
+        _completenessLevels.Add(completenessLevel);
+        
+        return completenessLevel;
+    }
+    
+    public void RemoveCompletenessLevel(CompletenessLevel completenessLevel)
+    {
+        if (completenessLevel == null) 
+            throw new ArgumentNullException(nameof(completenessLevel));
+        if (!_completenessLevels.Contains(completenessLevel))
+            throw new ArgumentException("The CompletenessLevel doesn't exist in Person class", nameof(completenessLevel));
+
+        // remove CompletenessLevel from Course
+        Course completenessLevelCourse = CompletenessLevel.Course;
+        completenessLevelCourse.RemoveCompletenessLevelReverse(completenessLevel);
+        
+        // remove CompletenessLevel from Person
+        _completenessLevels.Remove(completenessLevel);
+        
+        // remove CompletenessLevel
+        completenessLevel.RemoveCompletenessLevel();
+    }
+
+    public void UpdateCompletenessLevel(CompletenessLevel oldCompletenessLevel, int percentage, Course course)
+    {
+        if (oldCompletenessLevel == null)
+            throw new ArgumentNullException(nameof(oldCompletenessLevel));
+        if (!_completenessLevels.Contains(oldCompletenessLevel))
+            throw new ArgumentException("The CompletenessLevel doesn't exist in Person class", nameof(oldCompletenessLevel));
+        
+        // remove oldAttempt from Person
+        _completenessLevels.Remove(oldCompletenessLevel);
+        // remove oldAttempt from Challenge
+        oldCompletenessLevel.Course.RemoveCompletenessLevelReverse(oldCompletenessLevel);
+        // remove associations from CompletenessLevel
+        oldCompletenessLevel.DisassociateCompletenessLevel();
+        
+        // add new CompletenessLevel
+        AddCompletenessLevel(percentage, course);
+    }
+    
+    // reverse funcs for CompletenessLevel
+    public void AddCompletenessLevelReverse(CompletenessLevel completenessLevel)
+    {
+        _completenessLevels.Add(completenessLevel);
+    }
+
+    public void RemoveCompletenessLevelReverse(CompletenessLevel completenessLevel)
+    {
+        _completenessLevels.Remove(completenessLevel);
+    } 
+    
     
     // Attempt funcs
     public Attempt AddAttempt(string result, Challenge challenge)
@@ -220,6 +279,70 @@ public class Person
     public void RemoveAttemptReverse(Attempt attempt)
     {
         _attempts.Remove(attempt);
+    }
+    
+    
+    // Rank funcs
+    public Rank AddRank(int rankLevel, Leaderboard leaderboard)
+    {
+        if (rankLevel >= 0) 
+            throw new ArgumentException("The rankLevel should be >= to 0", nameof(rankLevel));
+        if (leaderboard == null) 
+            throw new ArgumentNullException(nameof(leaderboard));
+        
+        Rank rank = new Rank(rankLevel, this, leaderboard);
+        leaderboard.AddRankReverse(rank);
+        
+        _ranks.Add(rank);
+        
+        return rank;
+    }
+    
+    public void RemoveRank(Rank rank)
+    {
+        if (rank == null) 
+            throw new ArgumentNullException(nameof(rank));
+        if (!_ranks.Contains(rank))
+            throw new ArgumentException("The rank doesn't exist in Person class", nameof(rank));
+
+        // remove rank from Leaderboard
+        Leaderboard rankLeaderboard = rank.Leaderboard;
+        rankLeaderboard.RemoveRankReverse(rank);
+        
+        // remove rank from Person
+        _ranks.Remove(rank);
+        
+        // remove Rank
+        rank.RemoveRank();
+    }
+
+    public void UpdateRank(Rank oldRank, int rankLevel, Leaderboard leaderboard)
+    {
+        if (oldRank == null)
+            throw new ArgumentNullException(nameof(oldRank));
+        if (!_ranks.Contains(oldRank))
+            throw new ArgumentException("The rank doesn't exist in Person class", nameof(oldRank));
+        
+        // remove oldRank from Person
+        _ranks.Remove(oldRank);
+        // remove oldRank from Challenge
+        oldRank.Leaderboard.RemoveRankReverse(oldRank);
+        // remove associations from Rank
+        oldRank.DisassociateRank();
+        
+        // add new rank
+        AddRank(rankLevel, leaderboard);
+    }
+    
+    // reverse funcs for Attempt
+    public void AddRankReverse(Rank rank)
+    {
+        _ranks.Add(rank);
+    }
+
+    public void RemoveRankReverse(Rank rank)
+    {
+        _ranks.Remove(rank);
     }
     
     
@@ -450,7 +573,6 @@ public class Person
         int balance,
         Profile profile,
         Address address,
-        Rank rank,
         CompletenessLevel completenessLevel,
         Subscription subscription,
         List<Certificate>? certificates = null, // Дополнительные сертификаты
@@ -467,8 +589,6 @@ public class Person
             isActive,
             balance,
             address,
-            rank,
-            completenessLevel,
             profile
         );
 
@@ -561,14 +681,6 @@ public class Person
         oldAddress.RemovePerson(this); // Убираем связь с объектом Person в Address
     }
     
-    
-    // Метод для обновления ранга
-    public void UpdateRank(Rank newRank)
-    {
-        Rank = newRank;
-        Console.WriteLine($"{Name} has been updated to rank level {newRank.RankLevel}.");
-
-    }
 
     // Метод для добавления очков
     public void AddPoints(int points)
@@ -580,7 +692,6 @@ public class Person
         Console.WriteLine($"{Name} gained {points} points. Total: {_totalPoints}.");
 
     }
-
     
     
     // Метод для присвоения профиля

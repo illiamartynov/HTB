@@ -53,34 +53,78 @@ namespace HTB
             _extent.Add(this);
         }
 
-        // Добавление уроков с двусторонней связью
-        public void AddLesson(Lesson lesson)
+        
+        // CompletenessLevel funcs
+        public CompletenessLevel AddCompletenessLevel(int percentage, Person person)
         {
-            if (lesson == null) throw new ArgumentNullException(nameof(lesson));
-            if (!_lessons.Contains(lesson))
-            {
-                _lessons.Add(lesson);
-                lesson.AssignToCourse(this);
-            }
+            if (person == null)
+                throw new ArgumentNullException(nameof(person));
+
+            CompletenessLevel completenessLevel = new CompletenessLevel(percentage, person, this);
+            person.AddCompletenessLevelReverse(completenessLevel);
+
+            _completenessLevels.Add(completenessLevel);
+
+            return completenessLevel;
         }
 
-        // Удаление уроков с двусторонней связью
-        public void RemoveLesson(Lesson lesson)
+        public void RemoveCompletenessLevel(CompletenessLevel completenessLevel)
         {
-            if (lesson == null) throw new ArgumentNullException(nameof(lesson));
-            if (_lessons.Remove(lesson))
-            {
-                lesson.UnassignFromCourse();
-            }
+            if (!_completenessLevels.Contains(completenessLevel))
+                throw new ArgumentException("The CompletenessLevel doesn't exist in Course class", nameof(completenessLevel));
+
+            // remove CompletenessLevel from Person
+            Person rankPerson = completenessLevel.Person;
+            rankPerson.RemoveCompletenessLevelReverse(completenessLevel);
+
+            // remove CompletenessLevel from Course
+            _completenessLevels.Remove(completenessLevel);
+
+            // remove CompletenessLevel
+            completenessLevel.RemoveCompletenessLevel();
         }
 
-        // Удаление всех уроков
-        public void ClearLessons()
+        public void UpdateRank(CompletenessLevel oldCompletenessLevel, int percentage, Person person)
         {
-            foreach (var lesson in new List<Lesson>(_lessons))
+            if (oldCompletenessLevel == null)
+                throw new ArgumentNullException(nameof(oldCompletenessLevel));
+            if (!_completenessLevels.Contains(oldCompletenessLevel))
+                throw new ArgumentException("The CompletenessLevel doesn't exist in Course class", nameof(oldCompletenessLevel));
+
+            // remove oldCompletenessLevel from Course
+            _completenessLevels.Remove(oldCompletenessLevel);
+            // remove oldCompletenessLevel from Person
+            oldCompletenessLevel.Person.RemoveCompletenessLevelReverse(oldCompletenessLevel);
+            // remove associations from oldCompletenessLevel
+            oldCompletenessLevel.DisassociateCompletenessLevel();
+
+            // add new CompletenessLevel
+            AddCompletenessLevel(percentage, person);
+        }
+
+        // Course funcs
+        public static void DeleteCourse(Course course)
+        {
+            if (course == null)
+                throw new ArgumentNullException(nameof(course));
+
+            foreach (var com in new List<CompletenessLevel>(course._completenessLevels))
             {
-                RemoveLesson(lesson);
+                course.RemoveCompletenessLevel(com);
             }
+
+            _extent.Remove(course);
+        }
+
+        // funcs for reverse connection
+        public void AddCompletenessLevelReverse(CompletenessLevel completenessLevel)
+        {
+            _completenessLevels.Add(completenessLevel);
+        }
+
+        public void RemoveCompletenessLevelReverse(CompletenessLevel completenessLevel)
+        {
+            _completenessLevels.Remove(completenessLevel);
         }
 
         // Динамическая регистрация курса
@@ -89,23 +133,9 @@ namespace HTB
             Console.WriteLine($"Course '{CourseName}' registered with difficulty '{DifficultyLevel}'.");
             Console.WriteLine($"Access Type: {_accessType.GetAccessDescription()}");
         }
-
-        // Удаление курса с обработкой двусторонних связей
-        public static void DeleteCourse(Course course)
-        {
-            if (course == null)
-                throw new ArgumentNullException(nameof(course));
-
-            course._completenessLevels.Clear();
-            _extent.Remove(course);
-        }
         
         
-
-       
-
-        
-
+        // extent funcs
         public static void SaveExtent(string filename = "course_extent.json")
         {
             var json = JsonSerializer.Serialize(_extent);
@@ -127,6 +157,8 @@ namespace HTB
         }
     }
 
+    // Inheritance part
+    
     // Наследование вместо интерфейса для ContentType
     public class OSINT : Course
     {

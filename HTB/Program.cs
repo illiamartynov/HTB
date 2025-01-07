@@ -6,7 +6,7 @@ class Program
     static void Main(string[] args)
     {
         // Создаем Leaderboard
-        var leaderboard = new Leaderboard();
+        var leaderboard = new Leaderboard("Main");
 
         // Создаем адреса через фабричный метод AddAddress
         var address1 = Address.AddAddress("USA", "New York", "5th Avenue", 10);
@@ -19,12 +19,12 @@ class Program
         // Создаем пользователей
         var person1 = Person.AddPerson(
             "test1@example.com", "Test User 1", "password1", DateTime.Now, new DateTime(1990, 1, 1),
-            true, 100, new Profile(200, "Intermediate", null), address1, null, null, subscription1
+            true, 100, new Profile(200, "Intermediate", null), address1, null, subscription1
         );
 
         var person2 = Person.AddPerson(
             "test2@example.com", "Test User 2", "password2", DateTime.Now, new DateTime(1992, 2, 2),
-            false, 50, new Profile(100, "Beginner", null), address2, null, null, subscription2
+            false, 50, new Profile(100, "Beginner", null), address2, null, subscription2
         );
 
         // Привязываем ранги к пользователям
