@@ -1,7 +1,6 @@
 ﻿namespace HTB;
 
 using System;
-using System.ComponentModel.DataAnnotations;
 
 public class Payment
 {
@@ -48,26 +47,64 @@ public class Payment
             _currency = newCurrency;
     }
 
-    // Удаление связи с владельцем
-    public void UnassignOwner()
+    // funcs for person connection
+    public void AddPerson(Person person)
     {
+        if (person == null)
+            throw new ArgumentNullException(nameof(person));
+        if (Owner != person) 
+            throw new ArgumentException("The person already exists in the Profile class", nameof(person));
+
         Owner = null;
+        person.AddPaymentReverse(this);
     }
 
-    // Удаление платежа
-    public static void Delete(Payment payment)
+    public void RemovePerson(Person person)
     {
-        payment.UnassignOwner();
+        if (person == null)
+            throw new ArgumentNullException(nameof(person));
+        if (Owner != person)
+            throw new ArgumentException("Isn't the right person", nameof(person));
+    
+        // remove Person from Payment
+        Owner = null;
+
+        // remove Payment from person
+        person.RemovePaymentReverse(this);
+    }
+
+    public void UpdatePerson(Person oldPerson, Person newPerson)
+    {
+        if (oldPerson == null)
+            throw new ArgumentNullException(nameof(oldPerson));
+        if (newPerson == null)
+            throw new ArgumentNullException(nameof(newPerson));
+        if (Owner != oldPerson)
+            throw new ArgumentException("The oldPerson doesn't exist in Payment class", nameof(oldPerson));
+        if (Owner == newPerson)  
+            throw new ArgumentException("The person already exists in the Payment class", nameof(newPerson));
+    
+        Owner = null;
+        oldPerson.RemovePaymentReverse(this);
+
+        // add new person
+        Owner = newPerson;
+        newPerson.AddPaymentReverse(this);
+    }
+
+    // Person reverse funcs
+    public void AddPaymentReverse(Person person)
+    {
+        Owner = person;
+    }
+
+    public void RemovePaymentReverse(Person person)
+    {
+        Owner = person;
     }
 
     public void ViewPaymentDetails()
     {
         Console.WriteLine($"PaymentID: {_paymentID}, Amount: {_amount} in {_currency}, Method: {_paymentMethod}, Date: {_paymentDate}, Owner: {Owner?.Name}");
     }
-    // Payment
-    public void AssignOwner(Person owner)
-    {
-        Owner = owner ?? throw new ArgumentNullException(nameof(owner));
-    }
-
 }

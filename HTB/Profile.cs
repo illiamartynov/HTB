@@ -35,13 +35,12 @@ public class Profile
     {
         Points = points >= 0 ? points : throw new ArgumentOutOfRangeException(nameof(points));
         AcademyLevel = academyLevel ?? throw new ArgumentNullException(nameof(academyLevel));
-        Person = person ?? throw new ArgumentNullException(nameof(person));
     }
 
     public void UpdateProfile(int points, string academyLevel)
     {
-        Points = points >= 0 ? points : throw new ArgumentOutOfRangeException(nameof(points));
-        AcademyLevel = academyLevel ?? throw new ArgumentNullException(nameof(academyLevel));
+        Points = points;
+        AcademyLevel = academyLevel;
     }
 
     public void ViewProfile()
@@ -49,22 +48,63 @@ public class Profile
         Console.WriteLine($"Points: {_points}, Academy Level: {_academyLevel}");
     }
 
-    // Присвоение человека к профилю
-    public void AssignPerson(Person person)
+    // funcs for person connection
+    public void AddPerson(Person person)
     {
-        if (Person != null && Person != person)
-            throw new InvalidOperationException("This profile is already assigned to another person.");
+        if (person == null)
+            throw new ArgumentNullException(nameof(person));
+        if (Person != person) 
+            throw new ArgumentException("The person already exists in the Profile class", nameof(person));
 
+        Person = null;
+        person.AddProfileReverse(this);
+    }
+
+    public void RemovePerson(Person person)
+    {
+        if (person == null)
+            throw new ArgumentNullException(nameof(person));
+        if (Person != person)
+            throw new ArgumentException("Isn't the right person", nameof(person));
+    
+        // remove Person from Profile
+        Person = null;
+
+        // remove Profile from person
+        person.RemoveProfileReverse(this);
+    }
+
+    public void UpdatePerson(Person oldPerson, Person newPerson)
+    {
+        if (oldPerson == null)
+            throw new ArgumentNullException(nameof(oldPerson));
+        if (newPerson == null)
+            throw new ArgumentNullException(nameof(newPerson));
+        if (Person != oldPerson)
+            throw new ArgumentException("The oldPerson doesn't exist in Profile class", nameof(oldPerson));
+        if (Person == newPerson)  
+            throw new ArgumentException("The person already exists in the Profile class", nameof(newPerson));
+    
+        Person = null;
+        oldPerson.RemoveProfileReverse(this);
+
+        // add new person
+        Person = newPerson;
+        newPerson.AddProfileReverse(this);
+    }
+
+    // Person reverse funcs
+    public void AddProfileReverse(Person person)
+    {
         Person = person;
     }
 
-
-    // Удаление связи с человеком
-    public void UnassignPerson()
+    public void RemoveProfileReverse(Person person)
     {
-        Person = null;
+        Person = person;
     }
-
+    
+    
     public static void SaveExtent(string filename = "profile_extent.json")
     {
         var json = JsonSerializer.Serialize(Extent);

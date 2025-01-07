@@ -16,15 +16,18 @@ class Program
         var subscription1 = new Subscription(1, DateTime.Now, DateTime.Now.AddMonths(1), SubscriptionType.Premium, new Paid(100));
         var subscription2 = new Subscription(2, DateTime.Now, DateTime.Now.AddMonths(1), SubscriptionType.Free, new Free(30));
 
+        var profile1 = new Profile(200, "Intermediate", null);
+        var profile2 = new Profile(100, "Beginner", null);
+        
         // Создаем пользователей
         var person1 = Person.AddPerson(
             "test1@example.com", "Test User 1", "password1", DateTime.Now, new DateTime(1990, 1, 1),
-            true, 100, new Profile(200, "Intermediate", null), address1, null, subscription1
+            true, 100, profile1, address1
         );
 
         var person2 = Person.AddPerson(
             "test2@example.com", "Test User 2", "password2", DateTime.Now, new DateTime(1992, 2, 2),
-            false, 50, new Profile(100, "Beginner", null), address2, null, subscription2
+            false, 50, profile2, address2
         );
 
         // Привязываем ранги к пользователям

@@ -87,7 +87,7 @@ public class Person
     
     
     [Required(ErrorMessage = "Profile is required.")]
-    public Profile Profile { get; private set; } 
+    public Profile _profile { get; private set; } 
     
     // Attempt
     private List<Attempt> _attempts = new List<Attempt>(); 
@@ -113,9 +113,7 @@ public class Person
         bool isActive,
         int balance,
         Address address,
-        Profile profile,
-        List<Certificate>? certificates = null,
-        List<Payment>? payments = null
+        Profile profile
     )
     {
         Email = email;
@@ -126,29 +124,12 @@ public class Person
         IsActive = isActive;
         Balance = balance;
 
-        AssignProfile(profile);
-        AssignAddress(address);
-
-        // Добавление сертификатов
-        if (certificates != null)
-        {
-            foreach (var certificate in certificates)
-            {
-                AddCertificate(certificate);
-            }
-        }
-
-        // Добавление платежей
-        if (payments != null)
-        {
-            foreach (var payment in payments)
-            {
-                AddPayment(payment);
-            }
-        }
+        AddProfile(profile);
+        AddAddress(address);
 
         _extent.Add(this);
     }
+    
     
     // CompletenessLevel funcs
     public CompletenessLevel AddCompletenessLevel(int percentage, Course course)
@@ -399,55 +380,67 @@ public class Person
     {
         _subscriptions.Remove(subscription);
     }
+    
+    
+    // funcs for address connection
+    public void AddAddress(Address address)
+    {
+        if (address == null)
+            throw new ArgumentNullException(nameof(address));
+        if (Address == address) 
+            throw new ArgumentException("The address already exists in the Person class", nameof(address));
+
+        Address = null;
+        address.AddAddressReverse(this);
+    }
+
+    public void RemoveAddress(Address address)
+    {
+        if (address == null)
+            throw new ArgumentNullException(nameof(address));
+        if (Address != address)
+            throw new ArgumentException("Isn't the right address", nameof(address));
+        
+        // remove Address from Address
+        Address = null;
+
+        // remove Address from address
+        address.RemoveAddressReverse(this);
+    }
+
+    public void UpdateAddress(Address oldAddress, Address newAddress)
+    {
+        if (oldAddress == null)
+            throw new ArgumentNullException(nameof(oldAddress));
+        if (newAddress == null)
+            throw new ArgumentNullException(nameof(newAddress));
+        if (Address != oldAddress)
+            throw new ArgumentException("The oldAddress doesn't exist in Address class", nameof(oldAddress));
+        if (Address == newAddress)  
+            throw new ArgumentException("The address already exists in the Address class", nameof(newAddress));
+        
+        Address = null;
+        oldAddress.RemoveAddressReverse(this);
+
+        // add new address
+        Address = newAddress;
+        newAddress.AddAddressReverse(this);
+    }
+    
+    // Address reverse funcs
+    public void AddAddressReverse(Address address)
+    {
+        Address = address;
+    }
+
+    public void RemoveAddressReverse(Address address)
+    {
+        Address = address;
+    }
 
     
     
-    public Payment AssignPayment(int paymentID, float amount, DateTime paymentDate, string paymentMethod, string currency = "USD")
-    {
-        var payment = Payment.Create(paymentID, amount, paymentDate, paymentMethod, this, currency);
-        _payments.Add(payment);
-        return payment;
-    }
-
-    public void UnassignPayment(Payment payment)
-    {
-        if (payment == null)
-            throw new ArgumentNullException(nameof(payment));
-
-        if (_payments.Remove(payment))
-        {
-            payment.UnassignOwner();
-        }
-    }
-
-    // Добавление платежа
-    public Payment AddPayment(int paymentID, float amount, DateTime paymentDate, string paymentMethod, string currency = "USD")
-    {
-        var payment = Payment.Create(paymentID, amount, paymentDate, paymentMethod, this, currency);
-        _payments.Add(payment);
-        return payment;
-    }
-
-    // Обновление платежа
-    public void UpdatePayment(int paymentID, float? newAmount = null, DateTime? newDate = null, string? newMethod = null, string? newCurrency = null)
-    {
-        var payment = _payments.Find(p => p.PaymentID == paymentID);
-        if (payment == null)
-            throw new ArgumentException($"Payment with ID {paymentID} not found.");
-
-        payment.Update(newAmount, newDate, newMethod, newCurrency);
-    }
-
-    // Удаление платежа
-    public void DeletePayment(int paymentID)
-    {
-        var payment = _payments.Find(p => p.PaymentID == paymentID);
-        if (payment == null)
-            throw new ArgumentException($"Payment with ID {paymentID} not found.");
-
-        _payments.Remove(payment);
-        payment.UnassignOwner();
-    }
+    
     
     // funcs for certificate
     public void AddCertificate(Certificate certificate)
@@ -507,28 +500,6 @@ public class Person
     }
     
 
-    // Метод добавления платежа
-    public void AddPayment(Payment payment)
-    {
-        if (payment == null)
-            throw new ArgumentNullException(nameof(payment));
-
-        if (!_payments.Contains(payment))
-        {
-            _payments.Add(payment);
-            payment.AssignOwner(this);
-        }
-    }
-
-    // Метод удаления платежа
-    public void RemovePayment(Payment payment)
-    {
-        if (_payments.Remove(payment))
-        {
-            payment.UnassignOwner();
-        }
-    }
-
     // Метод для отображения всех сертификатов
     public void ViewCertificates()
     {
@@ -536,6 +507,120 @@ public class Person
         {
             certificate.ViewCertificate();
         }
+    }
+    
+    
+    // funcs for payment connection
+    public void AddPayment(Payment payment)
+    {
+        if (payment == null)
+            throw new ArgumentNullException(nameof(payment));
+        if (_payments.Contains(payment)) 
+            throw new ArgumentException("The payment already exists in the Person class", nameof(payment));
+
+        _payments.Add(payment);
+        payment.AddPaymentReverse(this);
+    }
+
+    public void RemovePayment(Payment payment)
+    {
+        if (payment == null)
+            throw new ArgumentNullException(nameof(payment));
+        if (!_payments.Contains(payment))
+            return;
+        
+        // remove payment from person
+        _payments.Remove(payment);
+
+        // remove person from payment
+        payment.RemovePaymentReverse(this);
+    }
+
+    public void UpdatePayment(Payment oldPayment, Payment newPayment)
+    {
+        if (oldPayment == null)
+            throw new ArgumentNullException(nameof(oldPayment));
+        if (newPayment == null)
+            throw new ArgumentNullException(nameof(newPayment));
+        if (!_payments.Contains(oldPayment))
+            throw new ArgumentException("The oldPayment doesn't exist in Person class", nameof(oldPayment));
+        if (_payments.Contains(newPayment))   
+            throw new ArgumentException("The payment already exists in the Person class", nameof(newPayment));
+        
+        _payments.Remove(oldPayment);
+        oldPayment.RemovePaymentReverse(this);
+
+        // add new payment
+        _payments.Add(newPayment);
+        newPayment.AddPaymentReverse(this);
+    }
+    
+    // Payment reverse funcs
+    public void AddPaymentReverse(Payment payment)
+    {
+        _payments.Add(payment);
+    }
+
+    public void RemovePaymentReverse(Payment payment)
+    {
+        _payments.Remove(payment);
+    }
+    
+    
+    // funcs for profile connection
+    public void AddProfile(Profile profile)
+    {
+        if (profile == null)
+            throw new ArgumentNullException(nameof(profile));
+        if (_profile == profile) 
+            throw new ArgumentException("The profile already exists in the Profile class", nameof(profile));
+
+        _profile = null;
+        profile.AddProfileReverse(this);
+    }
+
+    public void RemoveProfile(Profile profile)
+    {
+        if (profile == null)
+            throw new ArgumentNullException(nameof(profile));
+        if (_profile != profile)
+            throw new ArgumentException("Isn't the right profile", nameof(profile));
+        
+        // remove Profile from Profile
+        _profile = null;
+
+        // remove Profile from profile
+        profile.RemoveProfileReverse(this);
+    }
+
+    public void UpdateProfile(Profile oldProfile, Profile newProfile)
+    {
+        if (oldProfile == null)
+            throw new ArgumentNullException(nameof(oldProfile));
+        if (newProfile == null)
+            throw new ArgumentNullException(nameof(newProfile));
+        if (_profile != oldProfile)
+            throw new ArgumentException("The oldProfile doesn't exist in Profile class", nameof(oldProfile));
+        if (_profile == newProfile)  
+            throw new ArgumentException("The profile already exists in the Profile class", nameof(newProfile));
+        
+        _profile = null;
+        oldProfile.RemoveProfileReverse(this);
+
+        // add new profile
+        _profile = newProfile;
+        newProfile.AddProfileReverse(this);
+    }
+    
+    // Profile reverse funcs
+    public void AddProfileReverse(Profile profile)
+    {
+        _profile = profile;
+    }
+
+    public void RemoveProfileReverse(Profile profile)
+    {
+        _profile = profile;
     }
     
     public void AddReferral(Person referral)
@@ -595,29 +680,6 @@ public class Person
             newReferrer._referrals.Add(this);
         }
     }
-
-    
-    
-    public void UpdateProfile(Profile newProfile)
-    {
-        if (newProfile == null)
-            throw new ArgumentNullException(nameof(newProfile), "Profile cannot be null.");
-
-        if (ReferenceEquals(Profile, newProfile))
-            return; // Если профиль уже назначен, ничего не делаем
-
-        // Удаляем старую связь, если она есть
-        if (Profile != null)
-        {
-            var oldProfile = Profile;
-            Profile = null;
-            oldProfile.UnassignPerson();
-        }
-
-        // Назначаем новый профиль
-        Profile = newProfile;
-        newProfile.AssignPerson(this);
-    }
     
     public static Person AddPerson(
         string email,
@@ -628,10 +690,7 @@ public class Person
         bool isActive,
         int balance,
         Profile profile,
-        Address address,
-        CompletenessLevel completenessLevel,
-        List<Certificate>? certificates = null, // Дополнительные сертификаты
-        List<Payment>? payments = null          // Дополнительные платежи
+        Address address
     )
     {
         // Создаем объект Person с базовыми параметрами
@@ -647,27 +706,8 @@ public class Person
             profile
         );
 
-        // Добавляем сертификаты, если они переданы
-        if (certificates != null)
-        {
-            foreach (var certificate in certificates)
-            {
-                person.AddCertificate(certificate); // Используем AddCertificate вместо AssignCertificate
-            }
-        }
-
-        // Добавляем платежи, если они переданы
-        if (payments != null)
-        {
-            foreach (var payment in payments)
-            {
-                person.AddPayment(payment);
-            }
-        }
-
         return person;
     }
-
 
 
     public static void DeletePerson(Person person)
@@ -676,7 +716,7 @@ public class Person
         if (!_extent.Contains(person)) throw new InvalidOperationException("Person not found in the extent.");
 
         // Удаляем профиль вместе с `Person`
-        person.Profile = null;
+        person._profile = null;
         foreach (var certificate in person._certificates)
         {
             person.RemoveCertificate(certificate);
@@ -704,37 +744,6 @@ public class Person
         if (isActive.HasValue) IsActive = isActive.Value;
         if (balance.HasValue) Balance = balance.Value;
     }
-
-    public void AssignAddress(Address address)
-    {
-        if (address == null)
-            throw new ArgumentNullException(nameof(address), "Address cannot be null.");
-
-        if (ReferenceEquals(Address, address)) // Если новый адрес совпадает с текущим, ничего не делаем
-            return;
-
-        if (Address != null)
-        {
-            var oldAddress = Address;
-            Address = null; // Удаляем текущий адрес перед назначением нового
-            oldAddress.RemovePerson(this); // Убираем связь с объектом Person в старом Address
-        }
-
-        Address = address; // Назначаем новый адрес
-
-        if (!address.Persons.Contains(this))
-            address.AddPerson(this); // Устанавливаем связь с новым Address
-    }
-    
-    public void RemoveAddress()
-    {
-        if (Address == null)
-            return; // Если адреса нет, просто выходим из метода
-
-        var oldAddress = Address;
-        Address = null; // Сбрасываем адрес у текущего объекта Person
-        oldAddress.RemovePerson(this); // Убираем связь с объектом Person в Address
-    }
     
 
     // Метод для добавления очков
@@ -747,36 +756,6 @@ public class Person
         Console.WriteLine($"{Name} gained {points} points. Total: {_totalPoints}.");
 
     }
-    
-    
-    // Метод для присвоения профиля
-    public void AssignProfile(Profile profile)
-    {
-        if (profile == null)
-            throw new ArgumentNullException(nameof(profile), "Profile cannot be null.");
-
-        if (Profile != null)
-        {
-            var oldProfile = Profile;
-            Profile = null;
-            oldProfile.UnassignPerson();
-        }
-
-        Profile = profile;
-        profile.AssignPerson(this);
-    }
-
-    // Удаление связи с профилем
-    public void RemoveProfile()
-    {
-        if (Profile != null)
-        {
-            var oldProfile = Profile;
-            Profile = null;
-            oldProfile.UnassignPerson();
-        }
-    }
-
     
     public static void SaveExtent(string filename = "person_extent.json")
     {
