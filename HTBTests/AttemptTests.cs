@@ -19,7 +19,7 @@ namespace HTBTests
             challenge = new Challenge("Buffer Overflow", "Hard", "Exploit a buffer overflow", 100, ChallengeStatus.NotTried);
 
             var address = Address.AddAddress("USA", "New York", "5th Avenue", 101);
-            var leaderboard = new Leaderboard();
+            var leaderboard = new Leaderboard("temp");
             var subscription = new Subscription(1, DateTime.Now, DateTime.Now.AddMonths(1), SubscriptionType.Free, new Free(30));
 
             // Создаем объект Person с упрощением Profile, Rank, CompletenessLevel
@@ -32,18 +32,8 @@ namespace HTBTests
                 isActive: true,
                 balance: 0,
                 profile: new Profile(0, "Novice", null), // Profile создан без Person, связь добавляется позже
-                address: address,
-                rank: null, // Rank будет назначен после создания Person
-                completenessLevel: null, // CompletenessLevel будет назначен после создания Person
-                subscription: subscription
+                address: address
             );
-
-            // Назначение связи для Profile, Rank, CompletenessLevel
-            var profile = new Profile(0, "Novice", person);
-            var rank = new Rank(1, person, leaderboard);
-
-            person.AssignProfile(profile);
-            person.UpdateRank(rank);
         }
 
         [Test]

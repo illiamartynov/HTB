@@ -25,10 +25,7 @@ namespace HTBTests
                 isActive: true,
                 balance: 1000,
                 profile: null,
-                address: null,
-                rank: null,
-                completenessLevel: null,
-                subscription: null
+                address: null
             );
 
             profile = new Profile(500, "Intermediate", person);
@@ -69,27 +66,25 @@ namespace HTBTests
                 isActive: true,
                 balance: 2000,
                 profile: null,
-                address: null,
-                rank: null,
-                completenessLevel: null,
-                subscription: null
+                address: null
             );
 
-            profile.AssignPerson(newPerson);
+            profile.AddPerson(newPerson);
 
             Assert.Multiple(() =>
             {
                 Assert.That(profile.Person, Is.EqualTo(newPerson));
-                Assert.That(newPerson.Profile, Is.EqualTo(profile));
+                Assert.That(newPerson._profile, Is.EqualTo(profile));
             });
         }
 
         [Test]
         public void TestUnassignPerson()
         {
-            profile.UnassignPerson();
+            profile.RemovePerson(person);
 
             Assert.That(profile.Person, Is.Null);
+            Assert.That(person._profile, Is.Null);
         }
 
         [Test]

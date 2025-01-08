@@ -623,6 +623,7 @@ public class Person
         _profile = profile;
     }
     
+    
     public void AddReferral(Person referral)
     {
         if (referral == null)
@@ -645,6 +646,7 @@ public class Person
         if (_referrals.Remove(referral))
         {
             referral.ReferredBy = null;
+            _referrals.Remove(referral);
         }
     }
 

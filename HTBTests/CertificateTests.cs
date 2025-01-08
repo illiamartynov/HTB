@@ -15,10 +15,6 @@ namespace HTBTests
         public void Setup()
         {
             var address = Address.AddAddress("Test Country", "Test City", "Test Street", 123);
-            var rank = new Rank(1, null, new Leaderboard()); // Adjust leaderboard as per context
-            var accessType = new Free(30); // Example of IAccessType
-            var course = new Course("Intro to Security", "Beginner", accessType);
-            var completenessLevel = new CompletenessLevel(50, DateTime.Now, null, course);
             var profile = new Profile(100, "Basic", null); // Adjust person assignment later
 
             owner = new Person(
@@ -30,8 +26,6 @@ namespace HTBTests
                 isActive: true,
                 balance: 0,
                 address: address,
-                rank: rank,
-                completenessLevel: completenessLevel,
                 profile: profile
             );
 

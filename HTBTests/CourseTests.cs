@@ -8,96 +8,94 @@ namespace HTBTests
 
     public class CourseTests
     {
-        private Course course;
-        private Person person;
+        private Challenge _challenge;
+        private Person _person;
 
         [SetUp]
         public void Setup()
         {
-            Course.ClearExtent();
-            Person.ClearExtent();
+            typeof(Challenge).GetField("_extent",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)
+                ?.SetValue(null, new List<Challenge>());
 
-            var accessType = new Free(30);
-            course = new Course("Nmap Basics", "Intermediate", accessType);
+            typeof(Attempt).GetField("_extent",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)
+                ?.SetValue(null, new List<Attempt>());
 
-            var address = Address.AddAddress("USA", "New York", "5th Avenue", 10);
-            var profile = new Profile(500, "Intermediate", null);
-            var rank = new Rank(1, null, new Leaderboard());
-            var completenessLevel = new CompletenessLevel(80, DateTime.Now, null, course);
+            typeof(Person).GetField("_extent",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)
+                ?.SetValue(null, new List<Person>());
 
-            person = Person.AddPerson(
-                email: "user@example.com",
-                name: "UserTest",
-                password: "password",
-                registrationDate: DateTime.Now,
-                birthDate: DateTime.Now.AddYears(-20),
-                isActive: true,
-                balance: 500,
-                profile: profile,
-                address: address,
-                rank: rank,
-                completenessLevel: completenessLevel,
-                subscription: null
-            );
+            var address = Address.AddAddress("USA", "New York", "Broadway", 1);
+            var profile = new Profile(11, "", null);
+            _person = new Person("john.doe@example.com", "John Doe", "SecurePass123", DateTime.UtcNow,
+                new DateTime(1990, 1, 1), true, 100, address, profile);
         }
 
         [Test]
-        public void TestCourseCreation()
+        public void AddAttempt_ShouldAddAttemptToChallengeAndPerson()
         {
-            Assert.Multiple(() =>
-            {
-                Assert.That(course.CourseName, Is.EqualTo("Nmap Basics"));
-                Assert.That(course.DifficultyLevel, Is.EqualTo("Intermediate"));
-                Assert.That(course.AccessType.GetAccessDescription(), Is.EqualTo("Free access for 30 days."));
-            });
+            var attempt = _challenge.AddAttempt("successful", _person);
+
+            Assert.Contains(attempt, _challenge.Attempts.ToList());
+            Assert.Contains(attempt, _person.Attempts.ToList());
+            Assert.AreEqual(_challenge, attempt.Challenge);
+            Assert.AreEqual(_person, attempt.Person);
         }
 
         [Test]
-        public void TestAddLessonToCourse()
+        public void RemoveAttempt_ShouldRemoveAttemptFromChallengeAndPerson()
         {
-            var lesson = new Lesson("Port Scanning Basics", "Learn how to scan ports using Nmap");
-            course.AddLesson(lesson);
+            var attempt = _challenge.AddAttempt("successful", _person);
 
-            Assert.Multiple(() =>
-            {
-                Assert.That(course.Lessons, Contains.Item(lesson));
-                Assert.That(lesson.Course, Is.EqualTo(course));
-            });
+            _challenge.RemoveAttempt(attempt);
+
+            Assert.IsFalse(_challenge.Attempts.Contains(attempt));
+            Assert.IsFalse(_person.Attempts.Contains(attempt));
+            Assert.IsNull(attempt.Person);
+            Assert.IsNull(attempt.Challenge);
         }
 
         [Test]
-        public void TestRemoveLessonFromCourse()
+        public void DeleteChallenge_ShouldRemoveAllAttemptsAndChallenge()
         {
-            var lesson = new Lesson("Port Scanning Basics", "Learn how to scan ports using Nmap");
-            course.AddLesson(lesson);
-            course.RemoveLesson(lesson);
+            var attempt1 = _challenge.AddAttempt("successful", _person);
+            var attempt2 = _challenge.AddAttempt("successful", _person);
 
-            Assert.Multiple(() =>
-            {
-                Assert.That(course.Lessons, Does.Not.Contain(lesson));
-                Assert.That(lesson.Course, Is.Null);
-            });
+            Challenge.DeleteChallenge(_challenge);
+
+            Assert.IsEmpty(Challenge.Extent);
+            Assert.IsFalse(_person.Attempts.Contains(attempt1));
+            Assert.IsFalse(_person.Attempts.Contains(attempt2));
+            Assert.IsEmpty(Attempt.Extent);
         }
 
         [Test]
-        public void TestClearLessonsFromCourse()
+        public void AttemptExtent_ShouldContainAddedAttempts()
         {
-            var lesson1 = new Lesson("Port Scanning Basics", "Learn how to scan ports using Nmap");
-            var lesson2 = new Lesson("Service Detection", "Understand how to identify running services");
-            course.AddLesson(lesson1);
-            course.AddLesson(lesson2);
+            var attempt = _challenge.AddAttempt("successful", _person);
 
-            course.ClearLessons();
-
-            Assert.That(course.Lessons, Is.Empty);
+            Assert.Contains(attempt, Attempt.Extent.ToList());
         }
 
         [Test]
-        public void TestDeleteCourse()
+        public void InvalidScore_ShouldThrowException()
         {
-            Course.DeleteCourse(course);
+            Assert.Throws<ArgumentException>(() => _challenge.AddAttempt("successful", _person));
+        }
 
-            Assert.That(Course.Extent, Does.Not.Contain(course));
+        [Test]
+        public void AddAttempt_WithNullPerson_ShouldThrowException()
+        {
+            Assert.Throws<ArgumentNullException>(() => _challenge.AddAttempt("successful", _person));
+        }
+
+        [Test]
+        public void RemoveAttempt_WithInvalidAttempt_ShouldThrowException()
+        {
+            var invalidAttempt = new Attempt(_person, _challenge, "75");
+
+            Assert.Throws<ArgumentException>(() => _challenge.RemoveAttempt(invalidAttempt));
         }
     }
 }

@@ -6,6 +6,9 @@ namespace HTBTests
 {
     public class AddressTests
     {
+        private Person _person;
+        private Address _address;
+        
         [SetUp]
         public void Setup()
         {
@@ -13,82 +16,44 @@ namespace HTBTests
         }
 
         [Test]
-        public void AssignPersonToAddress_ShouldSetBidirectionalAssociation()
+        public void AddAddress_ShouldAddAddressToPersonAndAddress()
         {
-            // Arrange
-            var address = Address.AddAddress("USA", "New York", "5th Avenue", 101);
-            var leaderboard = new Leaderboard();
-            var rank = new Rank(1, null, leaderboard);
-            var completenessLevel = new CompletenessLevel(50, DateTime.Now, null, null);
-            var subscription = new Subscription(1, DateTime.Now, DateTime.Now.AddMonths(1), SubscriptionType.Free, new Free(30));
+            // Act
+            _person.AddAddress(_address);
 
-            // Создаем Person без Profile
-            var person = Person.AddPerson(
-                "person@example.com",
-                "TestPerson",
-                "password",
-                DateTime.Now,
-                DateTime.Now.AddYears(-25),
-                true,
-                100,
-                null, // Profile будет присвоен позже
-                address,
-                rank,
-                completenessLevel,
-                subscription
-            );
-
-            // Создаем профиль и присваиваем его человеку
-            var profile = new Profile(0, "Novice", person);
-            person.AssignProfile(profile);
-
-            // Act & Assert
-            Assert.Multiple(() =>
-            {
-                Assert.That(person.Address, Is.EqualTo(address));
-                Assert.That(person.Profile, Is.EqualTo(profile));
-                Assert.That(address.Persons.Contains(person), Is.True);
-            });
+            // Assert
+            Assert.AreEqual(_address, _person.Address);
+            Assert.AreEqual(_person, _address._person);
         }
 
         [Test]
-        public void RemovePersonFromAddress_ShouldRemoveBidirectionalAssociation()
+        public void RemoveAddress_ShouldRemoveAddressFromPersonAndAddress()
         {
             // Arrange
-            var address = Address.AddAddress("USA", "New York", "5th Avenue", 101);
-            var leaderboard = new Leaderboard();
-            var rank = new Rank(1, null, leaderboard);
-            var completenessLevel = new CompletenessLevel(50, DateTime.Now, null, null);
-            var subscription = new Subscription(1, DateTime.Now, DateTime.Now.AddMonths(1), SubscriptionType.Free, new Free(30));
-
-            var person = Person.AddPerson(
-                "person@example.com",
-                "TestPerson",
-                "password",
-                DateTime.Now,
-                DateTime.Now.AddYears(-25),
-                true,
-                100,
-                null, // Profile будет назначен позже
-                address,
-                rank,
-                completenessLevel,
-                subscription
-            );
-
-            var profile = new Profile(0, "Novice", person);
-            person.AssignProfile(profile);
+            _person.AddAddress(_address);
 
             // Act
-            address.RemovePerson(person);
+            _person.RemoveAddress(_address);
 
             // Assert
-            Assert.Multiple(() =>
-            {
-                Assert.That(address.Persons.Contains(person), Is.False);
-                Assert.That(person.Address, Is.Null);
-                Assert.That(person.Profile, Is.EqualTo(profile)); // Profile не меняется
-            });
+            Assert.IsNull(_person.Address);
+            Assert.IsNull(_address._person);
+        }
+
+        [Test]
+        public void UpdateAddress_ShouldUpdateBidirectionalReferences()
+        {
+            // Arrange
+            var newAddress = Address.AddAddress("Canada", "Toronto", "King Street", 10);
+            _person.AddAddress(_address);
+
+            // Act
+            _person.UpdateAddress(_address, newAddress);
+
+            // Assert
+            Assert.AreEqual(newAddress, _person.Address);
+            Assert.AreEqual(_person, newAddress._person);
+            Assert.IsNull(_address._person);
         }
     }
 }

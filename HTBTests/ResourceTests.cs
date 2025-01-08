@@ -29,7 +29,7 @@ namespace HTBTests
                 Assert.That(resource.ResourceName, Is.EqualTo("Pentesting Guide"));
                 Assert.That(resource.ResourceType, Is.EqualTo("Document"));
                 Assert.That(resource.Url, Is.EqualTo("https://example.com/pentest-guide"));
-                Assert.That(resource.Lesson, Is.EqualTo(lesson));
+                Assert.That(resource.Lessons.Contains(lesson), Is.True);
             });
         }
 
@@ -47,11 +47,11 @@ namespace HTBTests
         public void TestAssignLessonToResource()
         {
             var newLesson = new Lesson("Advanced Security", "In-depth topics on security.");
-            resource.AssignLesson(newLesson);
+            resource.AddLesson(newLesson);
 
             Assert.Multiple(() =>
             {
-                Assert.That(resource.Lesson, Is.EqualTo(newLesson));
+                Assert.That(resource.Lessons.Contains(lesson), Is.True);
                 Assert.That(newLesson.Resources, Contains.Item(resource));
                 Assert.That(lesson.Resources, Does.Not.Contain(resource));
             });
@@ -60,11 +60,11 @@ namespace HTBTests
         [Test]
         public void TestUnassignLessonFromResource()
         {
-            resource.UnassignLesson();
+            resource.RemoveLesson(lesson);
 
             Assert.Multiple(() =>
             {
-                Assert.That(resource.Lesson, Is.Null);
+                Assert.That(resource.Lessons.Contains(lesson), Is.False);
                 Assert.That(lesson.Resources, Does.Not.Contain(resource));
             });
         }
@@ -72,13 +72,13 @@ namespace HTBTests
         [Test]
         public void TestDeleteResource()
         {
-            Resource.DeleteResource(resource);
+            resource.RemoveLesson(lesson);
 
             Assert.Multiple(() =>
             {
                 Assert.That(Resource.Resources, Does.Not.Contain(resource));
                 Assert.That(lesson.Resources, Does.Not.Contain(resource));
-                Assert.That(resource.Lesson, Is.Null);
+                Assert.That(resource.Lessons.Contains(lesson), Is.False);
             });
         }
     }

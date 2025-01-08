@@ -16,13 +16,7 @@ namespace HTBTests
             challenge = new Challenge("Buffer Overflow", "Hard", "Exploit a buffer overflow", 100, ChallengeStatus.NotTried);
 
             var address = Address.AddAddress("USA", "New York", "5th Avenue", 101);
-            var leaderboard = new Leaderboard(); // Replace with valid Leaderboard instance as needed
-            var accessType = new Free(30);
-            var course = new Course("Intro to Exploits", "Intermediate", accessType);
-            var completenessLevel = new CompletenessLevel(50, DateTime.Now, null, course);
             var profile = new Profile(0, "Novice", null); // Adjust Person assignment later
-            var rank = new Rank(1, null, leaderboard);
-            var subscription = new Subscription(1, DateTime.Now, DateTime.Now.AddMonths(1), SubscriptionType.Free, accessType);
 
             person = Person.AddPerson(
                 email: "person@example.com",
@@ -33,10 +27,7 @@ namespace HTBTests
                 isActive: true,
                 balance: 0,
                 profile: profile,
-                address: address,
-                rank: rank,
-                completenessLevel: completenessLevel,
-                subscription: subscription
+                address: address
             );
         }
 

@@ -30,13 +30,16 @@ class Program
             false, 50, profile2, address2
         );
 
-        // Привязываем ранги к пользователям
-        var rank1 = new Rank(1, person1, leaderboard);
-        var rank2 = new Rank(2, person2, leaderboard);
-
         // Создаем курс (требуется для CompletenessLevel)
         var course1 = new Course("C# Basics", "Beginner", new Free(30));
         var course2 = new Course("Advanced C#", "Advanced", new Paid(150));
+        
+        person1.AddCompletenessLevel(10, course1);
+        person2.AddCompletenessLevel(10, course2);
+        
+        person1.AddSubscription(subscription1);
+        person2.AddSubscription(subscription2);
+
 
         // // Создаем уровни завершенности
         // var completenessLevel1 = new CompletenessLevel(80, DateTime.Now.AddMonths(-1), person1, course1);

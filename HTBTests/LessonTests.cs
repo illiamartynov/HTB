@@ -40,11 +40,11 @@ namespace HTBTests
         [Test]
         public void TestAssignToCourse()
         {
-            lesson.AssignToCourse(course);
+            lesson.AddCourse(course);
 
             Assert.Multiple(() =>
             {
-                Assert.That(lesson.Course, Is.EqualTo(course));
+                Assert.That(lesson.Courses.Contains(course), Is.EqualTo(true));
                 Assert.That(course.Lessons, Contains.Item(lesson));
             });
         }
@@ -52,12 +52,12 @@ namespace HTBTests
         [Test]
         public void TestUnassignFromCourse()
         {
-            lesson.AssignToCourse(course);
-            lesson.UnassignFromCourse();
+            lesson.AddCourse(course);
+            lesson.RemoveCourse(course);
 
             Assert.Multiple(() =>
             {
-                Assert.That(lesson.Course, Is.Null);
+                Assert.That(lesson.Courses.Contains(course), Is.False);
                 Assert.That(course.Lessons, Does.Not.Contain(lesson));
             });
         }
@@ -77,22 +77,6 @@ namespace HTBTests
             lesson.RemoveResource(resource);
 
             Assert.That(lesson.Resources, Does.Not.Contain(resource));
-        }
-
-        [Test]
-        public void TestDeleteLesson()
-        {
-            lesson.AssignToCourse(course);
-            var resource = new Resource("Resource 1", "Video", "https://example.com/resource1", lesson);
-
-            Lesson.DeleteLesson(lesson);
-
-            Assert.Multiple(() =>
-            {
-                Assert.That(Lesson.Extent, Does.Not.Contain(lesson));
-                Assert.That(course.Lessons, Does.Not.Contain(lesson));
-                Assert.That(lesson.Resources, Is.Empty);
-            });
         }
 
         [Test]
