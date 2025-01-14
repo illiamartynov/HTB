@@ -11,7 +11,7 @@ namespace HTB
         private static List<Course> _extent = new List<Course>();
         private string _courseName;
         private string _difficultyLevel;
-        private IAccessType _accessType;
+        private readonly IAccessType _accessType;
 
         // Двусторонняя связь с Lesson
         private List<Lesson> _lessons = new List<Lesson>();
@@ -38,7 +38,6 @@ namespace HTB
         public IAccessType AccessType
         {
             get => _accessType;
-            set => _accessType = value;
         }
 
         public IReadOnlyList<Lesson> Lessons => _lessons.AsReadOnly();
